@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 11:56:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/10/31 15:38:55 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/10/31 16:13:51 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include <sstream>
 
 //socket
-#include <sys/types.h>
+#include <ctype.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 //close
@@ -37,22 +37,6 @@ int	print_error(std::string file, int line, std::string error, int err) {
 	return err;
 }
 
-int setnonblocking(int socket)
-{
-	int result;
-	int flags;
-
-	flags = ::fcntl(socket, F_GETFL, 0);
-
-	if (flags == -1)
-		return -1;  // error
-
-	flags |= O_NONBLOCK;
-
-	result = fcntl(socket , F_SETFL , flags);
-	return result;
-}
-
 int	main(int argc, char **argv) {
 	if (argc != 3)
 		return print_error(__FILE__, __LINE__, "Needs two arguments ex: ./ircserv <port> <password>", 1);
@@ -66,7 +50,7 @@ int	main(int argc, char **argv) {
 
 	struct sockaddr_in	my_addr;
 	socklen_t			len = sizeof(my_addr);
-	memset(&my_addr, 0, len);
+	std::memset(&my_addr, 0, len);
 
 	my_addr.sin_family = AF_INET;
 	my_addr.sin_addr.s_addr = INADDR_ANY;
@@ -97,12 +81,16 @@ int	main(int argc, char **argv) {
 
 		std::cout << "connected" << std::endl;
 
+		char *ip;
+		ip = inet_ntoa(peer_addr.sin_addr);
+		std::cout << "ip: " << ip << " port: " << ntohs(peer_addr.sin_port) << std::endl;
+
 		char buffer1[256], buffer2[256];
 		if (recv(cfd, buffer2, 256, 0) == -1)
 			return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 		std::cout << "Client : " << buffer2 << std::endl;
 
-		memset(&buffer1, 0, 256);
+		std::memset(&buffer1, 0, 256);
 		strcpy(buffer1, "Hello");
 		if (send(cfd, buffer1, 256, 0) == -1)
 			return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
