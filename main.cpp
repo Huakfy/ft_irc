@@ -6,16 +6,17 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 11:56:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/10/30 16:02:10 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/10/31 14:36:43 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
+#include <sstream>
 
 //socket
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/un.h>
+#include <netinet/in.h>
 //close
 #include <unistd.h>
 //errno
@@ -26,6 +27,8 @@
 #include <arpa/inet.h>
 //getprotobyname
 #include <netdb.h>
+//epoll
+#include <sys/epoll.h>
 
 int	print_error(std::string file, int line, std::string error, int err) {
 	std::cerr << file << " line " << line << ": " << error << std::endl;
@@ -37,32 +40,52 @@ int	main(int argc, char **argv) {
 		//return std::cerr << "Needs two arguments ex: ./ircserv <port> <password>" << std::endl, 1;
 		return print_error(__FILE__, __LINE__, "Needs two arguments ex: ./ircserv <port> <password>", 1);
 
-	//verifier le ports (seulement des chiffres, max, ...)
+	//verifier le ports (seulement des chiffres, max, ...), port libre ?
 	//mot de passe, peut etre vide ?
 
-	int fd = socket(AF_UNIX, SOCK_STREAM, 0); //socket to listen on port
-	if (fd == -1)
+	int sfd = socket(AF_INET, SOCK_STREAM, 0); //socket to listen on port
+	if (sfd == -1)
 		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	struct sockaddr_un	my_addr;
+	struct sockaddr_in	my_addr;
 	socklen_t			len = sizeof(my_addr);
 	memset(&my_addr, 0, len);
 
-	my_addr.sun_family = AF_UNIX;
-	strncpy(my_addr.sun_path, "./test", sizeof(my_addr.sun_path) - 1);
+	my_addr.sin_family = AF_INET;
+	my_addr.sin_addr.s_addr = INADDR_ANY;
 
-	if (bind(fd, (struct sockaddr *) &my_addr, len) == -1)
+	// This ip address will change according to the machine
+	my_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+	std::stringstream	ss(argv[1]);
+	int	i;
+	ss >> i;
+	my_addr.sin_port = htons(i);
+
+	if (bind(sfd, (struct sockaddr *) &my_addr, len) == -1)
 		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	if (listen(fd, 10) == -1)
+	if (listen(sfd, 10) == -1)
 		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
+	struct sockaddr_in	peer_addr;
+	socklen_t	peer_addr_size;
+	int			cfd;
+	peer_addr_size = sizeof(peer_addr);
 
+	while (1)
 
-	if (close(fd) == -1) //close listening fd
+		cfd = accept(sfd, (struct sockaddr *) &peer_addr, &peer_addr_size);
+		if (cfd == -1)
+			return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+
+		std::cout << "connected" << std::endl;
+
+		break;
+	}
+
+	if (close(sfd) == -1) //close listening sfd
 		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-	(void)argv;
 	return 0;
 }
 
