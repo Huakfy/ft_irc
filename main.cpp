@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 11:56:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/10/31 16:13:51 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/10/31 16:57:39 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,22 @@ int	print_error(std::string file, int line, std::string error, int err) {
 	return err;
 }
 
+int setnonblocking(int sock)
+{
+	int result;
+	int flags;
+
+	flags = ::fcntl(sock, F_GETFL, 0);
+
+	if (flags == -1)
+		return -1;  // error
+
+	flags |= O_NONBLOCK;
+
+	result = fcntl(sock , F_SETFL , flags);
+	return result;
+}
+
 int	main(int argc, char **argv) {
 	if (argc != 3)
 		return print_error(__FILE__, __LINE__, "Needs two arguments ex: ./ircserv <port> <password>", 1);
@@ -48,7 +64,7 @@ int	main(int argc, char **argv) {
 	if (sfd == -1)
 		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	struct sockaddr_in	my_addr;
+	struct sockaddr_in	my_addr = {};
 	socklen_t			len = sizeof(my_addr);
 	std::memset(&my_addr, 0, len);
 
@@ -74,26 +90,72 @@ int	main(int argc, char **argv) {
 	int			cfd;
 	peer_addr_size = sizeof(peer_addr);
 
+
+	#define MAX_EVENTS 5
+	struct epoll_event ev = {}, events[MAX_EVENTS];
+	int epollfd = epoll_create1(0), nfds;
+	if (epollfd == -1)
+		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+
+	ev.events = EPOLLIN;
+	ev.data.fd = sfd;
+	if(epoll_ctl(epollfd, EPOLL_CTL_ADD, sfd, &ev) == -1)
+		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+
 	while (1) {
-		cfd = accept(sfd, (struct sockaddr *) &peer_addr, &peer_addr_size);
-		if (cfd == -1)
+		nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
+		if (nfds == -1)
 			return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-		std::cout << "connected" << std::endl;
+		for (i = 0; i < nfds; i++) {
+			if (events[i].data.fd == sfd) {
+				cfd = accept(sfd, (struct sockaddr *) &peer_addr, &peer_addr_size);
+				if (cfd == -1)
+					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+				//setnonblocking(cfd);
+				ev.events = EPOLLIN | EPOLLET;
+				ev.data.fd = cfd;
 
-		char *ip;
-		ip = inet_ntoa(peer_addr.sin_addr);
-		std::cout << "ip: " << ip << " port: " << ntohs(peer_addr.sin_port) << std::endl;
+				//if (epoll_ctl(epollfd, EPOLL_CTL_ADD, cfd, &ev) == -1)
+				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-		char buffer1[256], buffer2[256];
-		if (recv(cfd, buffer2, 256, 0) == -1)
-			return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		std::cout << "Client : " << buffer2 << std::endl;
+				std::cout << "connected" << std::endl;
 
-		std::memset(&buffer1, 0, 256);
-		strcpy(buffer1, "Hello");
-		if (send(cfd, buffer1, 256, 0) == -1)
-			return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+				char *ip;
+				ip = inet_ntoa(peer_addr.sin_addr);
+				std::cout << "ip: " << ip << " port: " << ntohs(peer_addr.sin_port) << std::endl;
+
+				char buffer1[256], buffer2[256];
+				if (recv(cfd, buffer2, 256, 0) == -1)
+					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+				std::cout << "Client : " << buffer2 << std::endl;
+
+				std::memset(&buffer1, 0, 256);
+				strcpy(buffer1, "Hello");
+				if (send(cfd, buffer1, 256, 0) == -1)
+					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+			}
+		}
+
+		//cfd = accept(sfd, (struct sockaddr *) &peer_addr, &peer_addr_size);
+		//if (cfd == -1)
+		//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+
+		//std::cout << "connected" << std::endl;
+
+		//char *ip;
+		//ip = inet_ntoa(peer_addr.sin_addr);
+		//std::cout << "ip: " << ip << " port: " << ntohs(peer_addr.sin_port) << std::endl;
+
+		//char buffer1[256], buffer2[256];
+		//if (recv(cfd, buffer2, 256, 0) == -1)
+		//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		//std::cout << "Client : " << buffer2 << std::endl;
+
+		//std::memset(&buffer1, 0, 256);
+		//strcpy(buffer1, "Hello");
+		//if (send(cfd, buffer1, 256, 0) == -1)
+		//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 		break;
 	}
 
