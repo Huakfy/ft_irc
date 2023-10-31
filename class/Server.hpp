@@ -3,9 +3,9 @@
 
 class Server{
 
-    private:
+	private:
 
-    public:
+	public:
 
 };
 
