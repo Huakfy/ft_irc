@@ -3,9 +3,9 @@
 
 class Client{
 
-    private:
+	private:
 
-    public:
+	public:
 
 };
 

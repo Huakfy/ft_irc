@@ -3,9 +3,9 @@
 
 class Channel{
 
-    private:
+	private:
 
-    public:
+	public:
 
 };
 
