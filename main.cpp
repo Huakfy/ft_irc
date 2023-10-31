@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 11:56:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/10/31 14:36:43 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/10/31 14:37:22 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,8 +73,7 @@ int	main(int argc, char **argv) {
 	int			cfd;
 	peer_addr_size = sizeof(peer_addr);
 
-	while (1)
-
+	while (1) {
 		cfd = accept(sfd, (struct sockaddr *) &peer_addr, &peer_addr_size);
 		if (cfd == -1)
 			return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
