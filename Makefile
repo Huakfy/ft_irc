@@ -6,14 +6,14 @@
 #    By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 11:30:07 by mjourno           #+#    #+#              #
-#    Updated: 2023/10/18 11:38:09 by mjourno          ###   ########.fr        #
+#    Updated: 2023/10/31 14:53:50 by mjourno          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME	=	ircserv
 #Compiler
 CC		=	c++
-FLAG	=	-Wall -Wextra -Werror -std=c++98
+FLAG	=	-Wall -Wextra -Werror -std=c++98 -g3
 #Source
 FILES	=	main
 FFORMAT	=	cpp

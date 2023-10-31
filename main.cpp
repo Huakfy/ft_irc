@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 11:56:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/10/31 14:37:22 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/10/31 15:38:55 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,15 +29,32 @@
 #include <netdb.h>
 //epoll
 #include <sys/epoll.h>
+//fcntl
+#include <fcntl.h>
 
 int	print_error(std::string file, int line, std::string error, int err) {
 	std::cerr << file << " line " << line << ": " << error << std::endl;
 	return err;
 }
 
+int setnonblocking(int socket)
+{
+	int result;
+	int flags;
+
+	flags = ::fcntl(socket, F_GETFL, 0);
+
+	if (flags == -1)
+		return -1;  // error
+
+	flags |= O_NONBLOCK;
+
+	result = fcntl(socket , F_SETFL , flags);
+	return result;
+}
+
 int	main(int argc, char **argv) {
 	if (argc != 3)
-		//return std::cerr << "Needs two arguments ex: ./ircserv <port> <password>" << std::endl, 1;
 		return print_error(__FILE__, __LINE__, "Needs two arguments ex: ./ircserv <port> <password>", 1);
 
 	//verifier le ports (seulement des chiffres, max, ...), port libre ?
@@ -55,7 +72,7 @@ int	main(int argc, char **argv) {
 	my_addr.sin_addr.s_addr = INADDR_ANY;
 
 	// This ip address will change according to the machine
-	my_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	my_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); //changer ip
 
 	std::stringstream	ss(argv[1]);
 	int	i;
@@ -65,7 +82,7 @@ int	main(int argc, char **argv) {
 	if (bind(sfd, (struct sockaddr *) &my_addr, len) == -1)
 		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	if (listen(sfd, 10) == -1)
+	if (listen(sfd, 10) == -1) //changer 10
 		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
 	struct sockaddr_in	peer_addr;
@@ -80,6 +97,15 @@ int	main(int argc, char **argv) {
 
 		std::cout << "connected" << std::endl;
 
+		char buffer1[256], buffer2[256];
+		if (recv(cfd, buffer2, 256, 0) == -1)
+			return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		std::cout << "Client : " << buffer2 << std::endl;
+
+		memset(&buffer1, 0, 256);
+		strcpy(buffer1, "Hello");
+		if (send(cfd, buffer1, 256, 0) == -1)
+			return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 		break;
 	}
 
