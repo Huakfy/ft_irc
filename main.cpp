@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 11:56:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/10/31 16:57:39 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/10/31 17:01:13 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,27 +136,6 @@ int	main(int argc, char **argv) {
 					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 			}
 		}
-
-		//cfd = accept(sfd, (struct sockaddr *) &peer_addr, &peer_addr_size);
-		//if (cfd == -1)
-		//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-		//std::cout << "connected" << std::endl;
-
-		//char *ip;
-		//ip = inet_ntoa(peer_addr.sin_addr);
-		//std::cout << "ip: " << ip << " port: " << ntohs(peer_addr.sin_port) << std::endl;
-
-		//char buffer1[256], buffer2[256];
-		//if (recv(cfd, buffer2, 256, 0) == -1)
-		//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		//std::cout << "Client : " << buffer2 << std::endl;
-
-		//std::memset(&buffer1, 0, 256);
-		//strcpy(buffer1, "Hello");
-		//if (send(cfd, buffer1, 256, 0) == -1)
-		//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		break;
 	}
 
 	if (close(sfd) == -1 || close(epollfd) == -1 || close(cfd) == -1) //close listening sfd
