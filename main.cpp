@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 11:56:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/01 17:12:50 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/01 17:21:39 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,14 +97,14 @@ int	main(int argc, char **argv) {
 				if (cfd == -1)
 					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-				if (fcntl(cfd, F_SETFL, O_NONBLOCK) == -1)
+				if (fcntl(cfd, F_SETFL, O_NONBLOCK) == -1) //setnonblocking
 					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
 				ev.events = EPOLLIN | EPOLLET;
 				ev.data.fd = cfd;
 
 				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, cfd, &ev) == -1)
-				return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
 				std::cout << "connected" << std::endl;
 
@@ -113,9 +113,10 @@ int	main(int argc, char **argv) {
 				std::cout << "ip: " << ip << " port: " << ntohs(peer_addr.sin_port) << std::endl;
 
 				char buffer1[256], buffer2[256];
+				std::memset(&buffer2, 0, 256);
 				if (recv(cfd, buffer2, 256, 0) == -1 && errno != EAGAIN) // verif eagain
 					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-				//std::cout << "Client : " << buffer2 << std::endl;
+				std::cout << "Client : " << buffer2 << std::endl;
 
 				std::memset(&buffer1, 0, 256);
 				strcpy(buffer1, "Hello");
@@ -123,7 +124,8 @@ int	main(int argc, char **argv) {
 					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 			}//deja connecté
 			else {
-
+				//do_use_fd(events[n].data.fd);
+				std::cout << "else" << std::endl;
 			}
 		}
 	}
