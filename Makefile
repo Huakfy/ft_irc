@@ -15,8 +15,6 @@ NAME	=	ircserv
 CC		=	c++
 FLAG	=	-Wall -Wextra -Werror -std=c++98 -g3
 #Source
-FILES	=	main
-FFORMAT	=	cpp
 SRC_DIR	=
 OBJ_DIR	=	obj/
 
