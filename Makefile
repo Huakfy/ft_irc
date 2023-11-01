@@ -24,7 +24,7 @@ HDIR	=	class/
 HNAME	=	Channel.hpp Client.hpp Server.hpp
 
 # Source
-FILES	=	mainre Channel Client Server
+FILES	=	main Channel Client Server
 
 SRCS	=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES)))
 OBJS	=	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES)))
