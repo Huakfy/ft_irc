@@ -15,8 +15,6 @@ NAME	=	ircserv
 CC		=	c++
 FLAG	=	-Wall -Wextra -Werror -std=c++98 -g3
 #Source
-FILES	=	main
-FFORMAT	=	cpp
 SRC_DIR	=
 OBJ_DIR	=	obj/
 
@@ -26,7 +24,7 @@ HDIR	=	class/
 HNAME	=	Channel.hpp Client.hpp Server.hpp
 
 # Source
-FILES	=	main Channel Client Server
+FILES	=	mainre Channel Client Server
 
 SRCS	=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES)))
 OBJS	=	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES)))
