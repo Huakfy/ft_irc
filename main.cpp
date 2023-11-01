@@ -116,8 +116,8 @@ int	main(int argc, char **argv) {
 				ev.events = EPOLLIN | EPOLLET;
 				ev.data.fd = cfd;
 
-				//if (epoll_ctl(epollfd, EPOLL_CTL_ADD, cfd, &ev) == -1)
-				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+				// if (epoll_ctl(epollfd, EPOLL_CTL_ADD, cfd, &ev) == -1)
+				// 	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
 				std::cout << "connected" << std::endl;
 
@@ -159,7 +159,7 @@ int	main(int argc, char **argv) {
 		break;
 	}
 
-	if (close(sfd) == -1) //close listening sfd
+	if (close(sfd) == -1 || close(epollfd) == -1 || close(cfd) == -1) //close listening sfd
 		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 	return 0;
 }
