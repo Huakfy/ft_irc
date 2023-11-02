@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 11:56:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/01 17:21:39 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/02 15:21:13 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,16 @@
 #include <sys/epoll.h>
 //fcntl
 #include <fcntl.h>
+//sigaction
+#include <signal.h>
 
 int	print_error(std::string file, int line, std::string error, int err) {
 	std::cerr << file << " line " << line << ": " << error << std::endl;
 	return err;
+}
+
+void	sigint_handler(int signum) {
+	(void)signum;
 }
 
 int	main(int argc, char **argv) {
@@ -84,6 +90,13 @@ int	main(int argc, char **argv) {
 	ev.data.fd = sfd;
 	if(epoll_ctl(epollfd, EPOLL_CTL_ADD, sfd, &ev) == -1)
 		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+
+	struct sigaction act, oldact;
+	act.sa_handler = sigint_handler;
+	sigemptyset(&act.sa_mask); // if == -1 errno
+	act.sa_flags = 0;
+	sigaction(SIGINT, NULL, &oldact); // if == -1 errno
+	sigaction(SIGINT, &act, NULL); // if == -1 errno
 
 	while (1) {
 		number_fds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
