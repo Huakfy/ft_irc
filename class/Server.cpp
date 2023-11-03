@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 16:42:10 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/03 17:19:34 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()
 	//if (bind(fd, (struct sockaddr *) &addr, len) == -1)
 	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	listen(fd, 10);
+	listen(fd, MAX_EVENTS);
 	//if (listen(fd, 10) == -1) //changer 10
 	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
@@ -106,8 +106,23 @@ void	Server::Launch() {
 				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 			}//deja connecté
 			else {
+				char	buffer[256];
+				std::memset(&buffer, 0, 256);
+				recv(events[i].data.fd, buffer, 256, 0);
+				std::cout << buffer << std::endl;
+
+				if (buffer[0] == 0) {
+					close(events[i].data.fd);
+					std::vector<Client>::iterator	it;
+					for (it = clients.begin(); it != clients.end(); it++) {
+						if ((*it).fd == events[i].data.fd)
+							break;
+					}
+					clients.erase(it);
+				}
+
 				//do_use_fd(events[n].data.fd);
-				std::cout << "else" << std::endl;
+				//std::cout << "else" << std::endl;
 			}
 		}
 	}

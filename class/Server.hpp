@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 16:37:18 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/03 17:19:29 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include "../Include.hpp"
 # include "Client.hpp"
 
-# define MAX_EVENTS 5
+# define MAX_EVENTS 10
 
 class Server {
 	private:
