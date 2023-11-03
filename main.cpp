@@ -6,42 +6,12 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 11:56:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/02 15:21:13 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/03 15:59:38 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <sstream>
-
-//socket
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-//close
-#include <unistd.h>
-//errno
-#include <cerrno>
-#include <cstring>
-//inet_ntoa
-#include <netinet/in.h>
-#include <arpa/inet.h>
-//getprotobyname
-#include <netdb.h>
-//epoll
-#include <sys/epoll.h>
-//fcntl
-#include <fcntl.h>
-//sigaction
-#include <signal.h>
-
-int	print_error(std::string file, int line, std::string error, int err) {
-	std::cerr << file << " line " << line << ": " << error << std::endl;
-	return err;
-}
-
-void	sigint_handler(int signum) {
-	(void)signum;
-}
+#include "Include.hpp"
+#include "class/Server.hpp"
 
 int	main(int argc, char **argv) {
 	if (argc != 3)
@@ -50,101 +20,11 @@ int	main(int argc, char **argv) {
 	//verifier le ports (seulement des chiffres, max, ...), port libre ?
 	//mot de passe, peut etre vide ?
 
-	int sfd = socket(AF_INET, SOCK_STREAM, 0); //socket to listen on port
-	if (sfd == -1)
-		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-	struct sockaddr_in	my_addr = {};
-	socklen_t			len = sizeof(my_addr);
-	std::memset(&my_addr, 0, len);
-
-	my_addr.sin_family = AF_INET;
-	my_addr.sin_addr.s_addr = INADDR_ANY;
-
-	// This ip address will change according to the machine
-	my_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); //changer ip
-
-	std::stringstream	ss(argv[1]);
-	int	i;
-	ss >> i;
-	my_addr.sin_port = htons(i);
-
-	if (bind(sfd, (struct sockaddr *) &my_addr, len) == -1)
-		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-	if (listen(sfd, 10) == -1) //changer 10
-		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-	struct sockaddr_in	peer_addr;
-	socklen_t	peer_addr_size;
-	int			cfd;
-	peer_addr_size = sizeof(peer_addr);
-
-	#define MAX_EVENTS 5
-	struct epoll_event ev = {}, events[MAX_EVENTS];
-	int epollfd = epoll_create1(0), number_fds;
-	if (epollfd == -1)
-		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-	ev.events = EPOLLIN;
-	ev.data.fd = sfd;
-	if(epoll_ctl(epollfd, EPOLL_CTL_ADD, sfd, &ev) == -1)
-		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-	struct sigaction act, oldact;
-	act.sa_handler = sigint_handler;
-	sigemptyset(&act.sa_mask); // if == -1 errno
-	act.sa_flags = 0;
-	sigaction(SIGINT, NULL, &oldact); // if == -1 errno
-	sigaction(SIGINT, &act, NULL); // if == -1 errno
-
-	while (1) {
-		number_fds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
-		if (number_fds == -1)
-			return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-		for (i = 0; i < number_fds; i++) {
-			//Premiere connexion
-			if (events[i].data.fd == sfd) {
-				cfd = accept(sfd, (struct sockaddr *) &peer_addr, &peer_addr_size);
-				if (cfd == -1)
-					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-				if (fcntl(cfd, F_SETFL, O_NONBLOCK) == -1) //setnonblocking
-					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-				ev.events = EPOLLIN | EPOLLET;
-				ev.data.fd = cfd;
-
-				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, cfd, &ev) == -1)
-					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-				std::cout << "connected" << std::endl;
-
-				char *ip;
-				ip = inet_ntoa(peer_addr.sin_addr);
-				std::cout << "ip: " << ip << " port: " << ntohs(peer_addr.sin_port) << std::endl;
-
-				char buffer1[256], buffer2[256];
-				std::memset(&buffer2, 0, 256);
-				if (recv(cfd, buffer2, 256, 0) == -1 && errno != EAGAIN) // verif eagain
-					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-				std::cout << "Client : " << buffer2 << std::endl;
-
-				std::memset(&buffer1, 0, 256);
-				strcpy(buffer1, "Hello");
-				if (send(cfd, buffer1, 256, 0) == -1)
-					return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-			}//deja connecté
-			else {
-				//do_use_fd(events[n].data.fd);
-				std::cout << "else" << std::endl;
-			}
-		}
+	try {
+		Server serv(argv[1]);
+	} catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
 	}
-
-	if (close(sfd) == -1 || close(epollfd) == -1 || close(cfd) == -1) //close listening sfd
-		return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 	return 0;
 }
 

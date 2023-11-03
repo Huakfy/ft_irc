@@ -6,29 +6,25 @@
 #    By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 11:30:07 by mjourno           #+#    #+#              #
-#    Updated: 2023/10/18 11:38:09 by mjourno          ###   ########.fr        #
+#    Updated: 2023/11/03 15:26:38 by mjourno          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME	=	ircserv
-
 CC		=	c++
 FLAG	=	-Wall -Wextra -Werror -std=c++98 -g3
+
 #Source
+FILES	=	main Channel Client Server utils
 SRC_DIR	=
 OBJ_DIR	=	obj/
 
 INCLUDE	=	-I ./class
-
-HDIR	=	class/
-HNAME	=	Channel.hpp Client.hpp Server.hpp
-
-# Source
-FILES	=	main Channel Client Server
+HNAME	=	Channel Client Server Include
 
 SRCS	=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES)))
 OBJS	=	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES)))
-HEADER	=	$(addprefix $(HDIR), $(HNAME))
+HEADER	=	$(addsuffix .hpp, $(HNAME))
 
 OBJF	=	.cache_exits
 
@@ -36,6 +32,7 @@ $(OBJF) :
 	@mkdir -p $(OBJ_DIR)
 
 vpath %.cpp $(SRC_DIR) $(SRC_DIR)class
+vpath %.hpp $(SRC_DIR) $(SRC_DIR)class
 
 all : $(NAME)
 
@@ -61,11 +58,5 @@ re : fclean all
 # Color
 
 DEF_COLOR	= \033[0;39m
-GRAY 		= \033[0;90m
 RED 		= \033[0;91m
 GREEN 		= \033[0;92m
-YELLOW 		= \033[0;93m
-BLUE		= \033[0;94m
-MAGENTA		= \033[0;95m
-CYAN		= \033[0;96m
-WHITE		= \033[0;97m
