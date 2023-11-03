@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 17:19:34 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/03 17:33:59 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ void	Server::Launch() {
 				char buffer1[256], buffer2[256];
 				std::memset(&buffer2, 0, 256);
 				recv(clients.back().fd, buffer2, 256, 0);
-				//if (recv(cfd, buffer2, 256, 0) == -1 && errno != EAGAIN) // verif eagain
+				//if (recv(cfd, buffer2, 256, 0) == -1) // verif eagain
 				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 				std::cout << "Client : " << buffer2 << std::endl;
 
