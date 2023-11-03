@@ -6,13 +6,13 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 16:39:42 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/03 16:42:10 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server(char *port, char *pass) : addr(sockaddr_in()), ev(epoll_event()) {
+Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()), ev(epoll_event()) {
 
 	(void)pass;
 
@@ -114,8 +114,10 @@ void	Server::Launch() {
 }
 
 Server::~Server() {
-	close(fd);
-	close(epollfd);
+	if (fd != -1)
+		close(fd);
+	if (epollfd != -1)
+		close(epollfd);
 	std::vector<Client>::iterator	it;
 	for (it = clients.begin(); it != clients.end(); it++) {
 		close((*it).fd);
