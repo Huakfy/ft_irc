@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 17:33:59 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/03 17:40:58 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,10 +108,10 @@ void	Server::Launch() {
 			else {
 				char	buffer[256];
 				std::memset(&buffer, 0, 256);
-				recv(events[i].data.fd, buffer, 256, 0);
+				int rd = recv(events[i].data.fd, buffer, 256, 0);
 				std::cout << buffer << std::endl;
-
-				if (buffer[0] == 0) {
+				//if (rd == -1) // error
+				if (rd == 0) {
 					close(events[i].data.fd);
 					std::vector<Client>::iterator	it;
 					for (it = clients.begin(); it != clients.end(); it++) {
