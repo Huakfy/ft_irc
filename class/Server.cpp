@@ -6,11 +6,14 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 17:40:58 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/03 17:53:54 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+
+//getaddrinfo au lieu de sockaddr_in -> remplir addr avec
+//map pour clients
 
 Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()), ev(epoll_event()) {
 
