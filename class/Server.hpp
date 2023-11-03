@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 15:33:07 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/03 16:37:18 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,10 @@ class Server {
 		int	fd, epollfd, number_fds;
 		struct sockaddr_in	addr;
 		std::vector<Client>	clients;
+		struct epoll_event	ev, events[MAX_EVENTS];
 	public:
-		Server(char *arg);
+		Server(char *port, char *pass);
+		void	Launch();
 		~Server();
 
 };

@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 11:56:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 15:59:38 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/03 16:38:58 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ int	main(int argc, char **argv) {
 	//mot de passe, peut etre vide ?
 
 	try {
-		Server serv(argv[1]);
+		Server server(argv[1], argv[2]);
+		server.Launch();
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 	}

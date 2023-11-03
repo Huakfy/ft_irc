@@ -6,37 +6,45 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 15:50:09 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/03 16:39:42 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server(char *arg) : addr(sockaddr_in()) {
+Server::Server(char *port, char *pass) : addr(sockaddr_in()), ev(epoll_event()) {
+
+	(void)pass;
+
 	fd = socket(AF_INET, SOCK_STREAM, 0); //socket to listen on port
 	//if (fd == -1)
 	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
 	socklen_t	len = sizeof(addr);
 	std::memset(&addr, 0, len);
+
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = INADDR_ANY;
+
 	// This ip address will change according to the machine
 	addr.sin_addr.s_addr = inet_addr("127.0.0.1"); //changer ip
-	std::stringstream	ss(arg);
+
+	std::stringstream	ss(port);
 	int	i;
 	ss >> i;
 	addr.sin_port = htons(i);
+
 	bind(fd, (struct sockaddr *) &addr, len);
 	//if (bind(fd, (struct sockaddr *) &addr, len) == -1)
 	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+
 	listen(fd, 10);
 	//if (listen(fd, 10) == -1) //changer 10
 	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	struct epoll_event ev = {}, events[MAX_EVENTS];
 	epollfd = epoll_create1(0);
 	//if (epollfd == -1)
 	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+
 	ev.events = EPOLLIN;
 	ev.data.fd = fd;
 	epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
@@ -49,13 +57,16 @@ Server::Server(char *arg) : addr(sockaddr_in()) {
 	act.sa_flags = 0;
 	sigaction(SIGINT, NULL, &oldact); // if == -1 errno
 	sigaction(SIGINT, &act, NULL); // if == -1 errno
+}
 
+
+void	Server::Launch() {
 	while (1) {
 		number_fds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
 		//if (number_fds == -1)
 		//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-		for (i = 0; i < number_fds; i++) {
+		for (int i = 0; i < number_fds; i++) {
 			//Premiere connexion
 			if (events[i].data.fd == fd) {
 				//cfd = accept(fd, (struct sockaddr *) &peer_addr, &peer_addr_size);
@@ -105,8 +116,9 @@ Server::Server(char *arg) : addr(sockaddr_in()) {
 Server::~Server() {
 	close(fd);
 	close(epollfd);
-	for (int i = 0; i < number_fds - 1; i++) {
-		close(clients[i].fd);
+	std::vector<Client>::iterator	it;
+	for (it = clients.begin(); it != clients.end(); it++) {
+		close((*it).fd);
 	}
-	//if == -1...
+
 }
