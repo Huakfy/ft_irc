@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 16:17:34 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 16:49:54 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,13 @@
 void Server::printfunctionerror(std::string file, int line, std::string error, int err){
 	if (_server)
 		freeaddrinfo(_server);
+	_server = NULL;
 	if (fd != -1)
 		close(fd);
+	fd = -1;
 	if (epollfd != -1)
 		close(epollfd);
+	epollfd = -1;
 	print_error(file, line, error, err);
 	throw FunctionError();
 }
@@ -85,11 +88,12 @@ void	Server::Launch() {
 			if (events[i].data.fd == fd) {
 				sockaddr_in	peer_addr = {};
 				socklen_t	peer_addr_size = sizeof(peer_addr);
+
 				int	tmpfd = accept(fd, (sockaddr *) &peer_addr, &peer_addr_size);
 				if (tmpfd == -1)
 					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
-				clients.insert(std::pair<int, Client>(fd, Client(peer_addr, peer_addr_size)));
+				clients.insert(std::pair<int, Client>(tmpfd, Client(peer_addr, peer_addr_size)));
 
 				if (fcntl(tmpfd, F_SETFL, O_NONBLOCK) == -1)
 					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
@@ -102,23 +106,26 @@ void	Server::Launch() {
 
 				std::cout << "connected" << std::endl;
 				char *ip;
-				ip = inet_ntoa(clients.end()->second.getAddr().sin_addr);
+				ip = inet_ntoa(clients.end()->second.getAddr().sin_addr); //verif return value
 				std::cout << "ip: " << ip << " port: " << ntohs(clients.end()->second.getAddr().sin_port) << std::endl;
 
 				char buffer1[256], buffer2[256];
 				std::memset(&buffer2, 0, 256);
+
 				if (recv(tmpfd, buffer2, 256, 0) == -1 && errno != EAGAIN) // verif pour eagain
 					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 				std::cout << "Client : " << buffer2 << std::endl;
 
 				std::memset(&buffer1, 0, 256);
-				strcpy(buffer1, "Hello");
+				std::strcpy(buffer1, "Hello");
+
 				if (send(tmpfd, buffer1, 256, 0) == -1)
 					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 			}//deja connecté
 			else {
 				char	buffer[256];
 				std::memset(&buffer, 0, 256);
+
 				int rd = recv(events[i].data.fd, buffer, 256, 0);
 				if (rd == -1 && errno != EAGAIN)
 					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
@@ -126,7 +133,7 @@ void	Server::Launch() {
 					close(events[i].data.fd);
 					clients.erase(events[i].data.fd);
 				}
-				std::cout << buffer << std::endl;
+				std::cout << buffer;
 				//do_use_fd(events[n].data.fd);
 				//std::cout << "else" << std::endl;
 			}
@@ -141,6 +148,6 @@ Server::~Server() {
 		close(epollfd);
 	std::map<int, Client>::iterator	it;
 	for (it = clients.begin(); it != clients.end(); it++) {
-		close((*it).first);
+		close(it->first);
 	}
 }
