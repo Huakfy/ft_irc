@@ -6,12 +6,12 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 11:56:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 17:38:43 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 17:20:13 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Include.hpp"
-#include "class/Server.hpp"
+#include "Server.hpp"
 
 int	main(int argc, char **argv) {
 	if (argc != 3)

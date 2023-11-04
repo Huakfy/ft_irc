@@ -6,14 +6,14 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 17:11:29 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 17:21:33 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include "../Include.hpp"
+# include "Include.hpp"
 # include "Client.hpp"
 # include <map>
 

@@ -6,7 +6,7 @@
 #    By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 11:30:07 by mjourno           #+#    #+#              #
-#    Updated: 2023/11/03 15:26:38 by mjourno          ###   ########.fr        #
+#    Updated: 2023/11/04 17:21:21 by mjourno          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,12 +19,12 @@ FILES	=	main Channel Client Server utils
 SRC_DIR	=
 OBJ_DIR	=	obj/
 
-INCLUDE	=	-I ./class
+INCLUDE	=	-I ./class -I ./
 HNAME	=	Channel Client Server Include
+HEADER	=	$(addsuffix .hpp, $(HNAME))
 
 SRCS	=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES)))
 OBJS	=	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES)))
-HEADER	=	$(addsuffix .hpp, $(HNAME))
 
 OBJF	=	.cache_exits
 
@@ -37,12 +37,12 @@ vpath %.hpp $(SRC_DIR) $(SRC_DIR)class
 all : $(NAME)
 
 $(NAME) : $(OBJS)
-	$(CC) $(FLAG) $(OBJS) -o $(NAME)
+	$(CC) $(FLAG) $(OBJS) $(INCLUDE) -o $(NAME)
 	@echo "$(GREEN)Compiled!$(DEF_COLOR)"
 	@echo "Launch the program with $(RED)./${NAME} $(DEF_COLOR)<port> <password>"
 
 $(OBJ_DIR)%.o : %.cpp $(HEADER) Makefile | $(OBJF)
-	$(CC) $(FLAG) -c $< -o $@
+	$(CC) $(FLAG) $(INCLUDE) -c $< -o $@
 
 clean :
 	@rm -rf $(OBJ_DIR)
