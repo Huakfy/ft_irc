@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 15:46:53 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 17:05:44 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,9 @@ class Server {
 				}
 		};
 
-		void printfunctionerror(std::string file, int line, std::string error, int err);
+		void	printfunctionerror(std::string file, int line, std::string error, int err);
+		int		NewClient();
+		void	ExistingClient(int i);
 
 	public:
 		Server(char *port, char *pass);

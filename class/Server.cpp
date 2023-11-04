@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 16:49:54 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 17:07:09 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void Server::printfunctionerror(std::string file, int line, std::string error, i
 
 Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()), _hints(addrinfo()), _server(NULL), ev(epoll_event()) {
 
-	(void)pass;
+	(void)pass; //
 
 	_hints.ai_family = AF_INET;
 	_hints.ai_socktype = SOCK_STREAM;
@@ -76,6 +76,46 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()
 		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 }
 
+int	Server::NewClient() {
+	sockaddr_in	peer_addr = {};
+	socklen_t	peer_addr_size = sizeof(peer_addr);
+
+	int	tmpfd = accept(fd, (sockaddr *) &peer_addr, &peer_addr_size);
+	if (tmpfd == -1)
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
+
+	clients.insert(std::pair<int, Client>(tmpfd, Client(peer_addr, peer_addr_size)));
+
+	if (fcntl(tmpfd, F_SETFL, O_NONBLOCK) == -1)
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
+
+	ev.events = EPOLLIN | EPOLLET;
+	ev.data.fd = tmpfd;
+
+	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tmpfd, &ev) == -1)
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
+
+	return tmpfd;
+}
+
+void	Server::ExistingClient(int i) {
+
+
+	//tests
+	char	buffer[256];
+	std::memset(&buffer, 0, 256);
+
+	int rd = recv(events[i].data.fd, buffer, 256, 0);
+	if (rd == -1 && errno != EAGAIN)
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
+	else if (rd == 0) {
+		close(events[i].data.fd);
+		clients.erase(events[i].data.fd);
+	}
+	std::cout << buffer;
+	//endtests
+}
+
 
 void	Server::Launch() {
 	while (1) {
@@ -86,24 +126,9 @@ void	Server::Launch() {
 		for (int i = 0; i < number_fds; i++) {
 			//Premiere connexion
 			if (events[i].data.fd == fd) {
-				sockaddr_in	peer_addr = {};
-				socklen_t	peer_addr_size = sizeof(peer_addr);
+				int tmpfd = NewClient();
 
-				int	tmpfd = accept(fd, (sockaddr *) &peer_addr, &peer_addr_size);
-				if (tmpfd == -1)
-					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
-
-				clients.insert(std::pair<int, Client>(tmpfd, Client(peer_addr, peer_addr_size)));
-
-				if (fcntl(tmpfd, F_SETFL, O_NONBLOCK) == -1)
-					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
-
-				ev.events = EPOLLIN | EPOLLET;
-				ev.data.fd = tmpfd;
-
-				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tmpfd, &ev) == -1)
-					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
-
+				//tests
 				std::cout << "connected" << std::endl;
 				char *ip;
 				ip = inet_ntoa(clients.end()->second.getAddr().sin_addr); //verif return value
@@ -121,21 +146,11 @@ void	Server::Launch() {
 
 				if (send(tmpfd, buffer1, 256, 0) == -1)
 					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
+				//endtests
+
 			}//deja connecté
 			else {
-				char	buffer[256];
-				std::memset(&buffer, 0, 256);
-
-				int rd = recv(events[i].data.fd, buffer, 256, 0);
-				if (rd == -1 && errno != EAGAIN)
-					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
-				else if (rd == 0) {
-					close(events[i].data.fd);
-					clients.erase(events[i].data.fd);
-				}
-				std::cout << buffer;
-				//do_use_fd(events[n].data.fd);
-				//std::cout << "else" << std::endl;
+				ExistingClient(i);
 			}
 		}
 	}
