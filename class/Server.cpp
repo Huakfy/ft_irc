@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 17:53:54 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 11:58:18 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()
 	ss >> i;
 	addr.sin_port = htons(i);
 
-	bind(fd, (struct sockaddr *) &addr, len);
+	bind(fd, (sockaddr *) &addr, len);
 	//if (bind(fd, (struct sockaddr *) &addr, len) == -1)
 	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
@@ -73,38 +73,42 @@ void	Server::Launch() {
 			//Premiere connexion
 			if (events[i].data.fd == fd) {
 				//cfd = accept(fd, (struct sockaddr *) &peer_addr, &peer_addr_size);
-				clients.push_back(Client());
-				clients.back().fd = accept(fd, (struct sockaddr *) &clients.back().addr, &clients.back().addr_size);
+
+				sockaddr_in	peer_addr = {};
+				socklen_t	peer_addr_size = sizeof(peer_addr);
+				int	tmpfd = accept(fd, (sockaddr *) &peer_addr, &peer_addr_size);
 				//if (cfd == -1)
 				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-				fcntl(clients.back().fd, F_SETFL, O_NONBLOCK);
+				clients.insert(std::pair<int, Client>(fd, Client(peer_addr, peer_addr_size)));
+
+				fcntl(tmpfd, F_SETFL, O_NONBLOCK);
 				//if (fcntl(cfd, F_SETFL, O_NONBLOCK) == -1) //setnonblocking
 				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
 				ev.events = EPOLLIN | EPOLLET;
-				ev.data.fd = clients.back().fd;
+				ev.data.fd = tmpfd;
 
-				epoll_ctl(epollfd, EPOLL_CTL_ADD, clients.back().fd, &ev);
+				epoll_ctl(epollfd, EPOLL_CTL_ADD, tmpfd, &ev);
 				//if (epoll_ctl(epollfd, EPOLL_CTL_ADD, cfd, &ev) == -1)
 				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
 				std::cout << "connected" << std::endl;
 
 				char *ip;
-				ip = inet_ntoa(clients.back().addr.sin_addr);
-				std::cout << "ip: " << ip << " port: " << ntohs(clients.back().addr.sin_port) << std::endl;
+				ip = inet_ntoa(clients.end()->second.getAddr().sin_addr);
+				std::cout << "ip: " << ip << " port: " << ntohs(clients.end()->second.getAddr().sin_port) << std::endl;
 
 				char buffer1[256], buffer2[256];
 				std::memset(&buffer2, 0, 256);
-				recv(clients.back().fd, buffer2, 256, 0);
+				recv(tmpfd, buffer2, 256, 0);
 				//if (recv(cfd, buffer2, 256, 0) == -1) // verif eagain
 				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 				std::cout << "Client : " << buffer2 << std::endl;
 
 				std::memset(&buffer1, 0, 256);
 				strcpy(buffer1, "Hello");
-				send(clients.back().fd, buffer1, 256, 0);
+				send(tmpfd, buffer1, 256, 0);
 				//if (send(cfd, buffer1, 256, 0) == -1)
 				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 			}//deja connecté
@@ -116,12 +120,7 @@ void	Server::Launch() {
 				//if (rd == -1) // error
 				if (rd == 0) {
 					close(events[i].data.fd);
-					std::vector<Client>::iterator	it;
-					for (it = clients.begin(); it != clients.end(); it++) {
-						if ((*it).fd == events[i].data.fd)
-							break;
-					}
-					clients.erase(it);
+					clients.erase(events[i].data.fd);
 				}
 
 				//do_use_fd(events[n].data.fd);
@@ -136,9 +135,8 @@ Server::~Server() {
 		close(fd);
 	if (epollfd != -1)
 		close(epollfd);
-	std::vector<Client>::iterator	it;
+	std::map<int, Client>::iterator	it;
 	for (it = clients.begin(); it != clients.end(); it++) {
-		close((*it).fd);
+		close((*it).first);
 	}
-
 }

@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 15:18:24 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/03 15:57:08 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 11:02:15 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@
 # include <iostream>
 
 # include <string>
-# include <vector>
 
 class SigInt : public std::exception {
 	virtual const char *what() const throw() {
