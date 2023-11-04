@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 11:02:38 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 15:39:16 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,34 @@ class Server {
 			public:
 				virtual const char * what() const throw(){
 					return ("listen error");
+				}
+		};
+
+		class Epollcreate1Error : public std::exception{
+			public:
+				virtual const char * what() const throw(){
+					return ("Epollcreate1 error");
+				}
+		};
+
+		class EpollctlError : public std::exception{
+			public:
+				virtual const char * what() const throw(){
+					return ("Epollctl error");
+				}
+		};
+
+		class SigemptysetError : public std::exception{
+			public:
+				virtual const char * what() const throw(){
+					return ("Sigemptyset error");
+				}
+		};
+
+		class SigactionError : public std::exception{
+			public:
+				virtual const char * what() const throw(){
+					return ("Sigaction error");
 				}
 		};
 

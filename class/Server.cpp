@@ -6,14 +6,11 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 11:58:18 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 15:40:07 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-
-//getaddrinfo au lieu de sockaddr_in -> remplir addr avec
-//map pour clients
 
 Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()), _hints(addrinfo()), ev(epoll_event()) {
 
@@ -23,63 +20,66 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()
 	_hints.ai_socktype = SOCK_STREAM;
 	_hints.ai_flags = AI_PASSIVE;
 
-	if (getaddrinfo(NULL, port, &_hints, &_server) < 0){
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
+	if (getaddrinfo(NULL, port, &_hints, &_server) != 0) {
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		throw GetaddrinfoError();
 	}
 
-	// fd = socket(AF_INET, SOCK_STREAM, 0); //socket to listen on port
 	fd = socket(_server->ai_family, _server->ai_socktype, _server->ai_protocol);
-	if (fd == -1)
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
+	if (fd == -1) {
+		freeaddrinfo(_server);
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		throw SocketError();
+	}
 
 	int optval = 1;
-	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
+		freeaddrinfo(_server);
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		throw SetsockoptError();
+	}
 
-	// socklen_t	len = sizeof(addr);
-	// std::memset(&addr, 0, len);
+	if (bind(fd, _server->ai_addr, _server->ai_addrlen) == -1) {
+		freeaddrinfo(_server);
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		throw BindError();
+	}
 
-	// addr.sin_family = AF_INET;
-	// addr.sin_addr.s_addr = INADDR_ANY;
-
-	// This ip address will change according to the machine
-	// addr.sin_addr.s_addr = inet_addr("127.0.0.1"); //changer ip
-
-	// std::stringstream	ss(port);
-	// int	i;
-	// ss >> i;
-	// addr.sin_port = htons(i);
-
-	// bind(fd, (sockaddr *) &addr, len);
-	//if (bind(fd, (struct sockaddr *) &addr, len) == -1)
-	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-
-	if (bind(fd, _server->ai_addr, _server->ai_addrlen) == -1)
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
-
-
-	if (listen(fd, MAX_EVENTS) == -1)
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
+	if (listen(fd, MAX_EVENTS) == -1) {
+		freeaddrinfo(_server);
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		throw ListenError();
+	}
 	freeaddrinfo(_server);
-	//if (listen(fd, 10) == -1) //changer 10
-	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
 	epollfd = epoll_create1(0);
-	//if (epollfd == -1)
-	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+	if (epollfd == -1) {
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		throw Epollcreate1Error();
+	}
 
 	ev.events = EPOLLIN;
 	ev.data.fd = fd;
-	epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
-	//if(epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == -1)
-	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == -1) {
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		throw EpollctlError();
+	}
 
 	struct sigaction act, oldact;
 	act.sa_handler = sigint_handler;
-	sigemptyset(&act.sa_mask); // if == -1 errno
+	if (sigemptyset(&act.sa_mask) == -1) {
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		throw SigemptysetError();
+	}
 	act.sa_flags = 0;
-	sigaction(SIGINT, NULL, &oldact); // if == -1 errno
-	sigaction(SIGINT, &act, NULL); // if == -1 errno
+	if (sigaction(SIGINT, NULL, &oldact) == -1) {
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		throw SigactionError();
+	}
+	if (sigaction(SIGINT, &act, NULL) == -1) {
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		throw SigactionError();
+	}
 }
 
 
