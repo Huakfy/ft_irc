@@ -35,6 +35,8 @@ class Server {
 				}
 		};
 
+		void printfunctionerror(std::string file, int line, std::string error, int err);
+
 	public:
 		Server(char *port, char *pass);
 		void	Launch();

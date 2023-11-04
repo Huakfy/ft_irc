@@ -12,7 +12,18 @@
 
 #include "Server.hpp"
 
-Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()), _hints(addrinfo()), ev(epoll_event()) {
+void Server::printfunctionerror(std::string file, int line, std::string error, int err){
+	if (_server)
+		freeaddrinfo(_server);
+	if (fd != -1)
+		close(fd);
+	if (epollfd != -1)
+		close(epollfd);
+	print_error(file, line, error, err);
+	throw FunctionError();
+}
+
+Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()), _hints(addrinfo()), _server(NULL), ev(epoll_event()) {
 
 	(void)pass;
 
@@ -20,66 +31,46 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()
 	_hints.ai_socktype = SOCK_STREAM;
 	_hints.ai_flags = AI_PASSIVE;
 
-	if (getaddrinfo(NULL, port, &_hints, &_server) != 0) {
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw FunctionError();
-	}
+	if (getaddrinfo(NULL, port, &_hints, &_server) != 0)
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 	fd = socket(_server->ai_family, _server->ai_socktype, _server->ai_protocol);
-	if (fd == -1) {
-		freeaddrinfo(_server);
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw FunctionError();
-	}
+	if (fd == -1) 
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 	int optval = 1;
-	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
-		freeaddrinfo(_server);
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw FunctionError();
-	}
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	if (bind(fd, _server->ai_addr, _server->ai_addrlen) == -1) {
-		freeaddrinfo(_server);
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw FunctionError();
-	}
+	if (bind(fd, _server->ai_addr, _server->ai_addrlen) == -1)
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	if (listen(fd, MAX_EVENTS) == -1) {
-		freeaddrinfo(_server);
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw FunctionError();
-	}
+	if (listen(fd, MAX_EVENTS) == -1)
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
+
 	freeaddrinfo(_server);
+	_server = NULL;
 
 	epollfd = epoll_create1(0);
-	if (epollfd == -1) {
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw FunctionError();
-	}
+	if (epollfd == -1)
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 	ev.events = EPOLLIN;
 	ev.data.fd = fd;
-	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == -1) {
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw FunctionError();
-	}
+	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) != -1)
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 	struct sigaction act, oldact;
 	act.sa_handler = sigint_handler;
-	if (sigemptyset(&act.sa_mask) == -1) {
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw FunctionError();
-	}
+	if (sigemptyset(&act.sa_mask) == -1)
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
+
 	act.sa_flags = 0;
-	if (sigaction(SIGINT, NULL, &oldact) == -1) {
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw FunctionError();
-	}
-	if (sigaction(SIGINT, &act, NULL) == -1) {
-		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw FunctionError();
-	}
+	if (sigaction(SIGINT, NULL, &oldact) == -1) 
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
+
+	if (sigaction(SIGINT, &act, NULL) == -1) 
+		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 }
 
 
