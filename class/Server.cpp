@@ -15,32 +15,52 @@
 //getaddrinfo au lieu de sockaddr_in -> remplir addr avec
 //map pour clients
 
-Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()), ev(epoll_event()) {
+Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()), _hints(addrinfo()), ev(epoll_event()) {
 
 	(void)pass;
 
-	fd = socket(AF_INET, SOCK_STREAM, 0); //socket to listen on port
-	//if (fd == -1)
-	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
-	socklen_t	len = sizeof(addr);
-	std::memset(&addr, 0, len);
+	_hints.ai_family = AF_INET;
+	_hints.ai_socktype = SOCK_STREAM;
+	_hints.ai_flags = AI_PASSIVE;
 
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = INADDR_ANY;
+	if (getaddrinfo(NULL, port, &_hints, &_server) < 0){
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
+	}
+
+	// fd = socket(AF_INET, SOCK_STREAM, 0); //socket to listen on port
+	fd = socket(_server->ai_family, _server->ai_socktype, _server->ai_protocol);
+	if (fd == -1)
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
+
+	int optval = 1;
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
+
+	// socklen_t	len = sizeof(addr);
+	// std::memset(&addr, 0, len);
+
+	// addr.sin_family = AF_INET;
+	// addr.sin_addr.s_addr = INADDR_ANY;
 
 	// This ip address will change according to the machine
-	addr.sin_addr.s_addr = inet_addr("127.0.0.1"); //changer ip
+	// addr.sin_addr.s_addr = inet_addr("127.0.0.1"); //changer ip
 
-	std::stringstream	ss(port);
-	int	i;
-	ss >> i;
-	addr.sin_port = htons(i);
+	// std::stringstream	ss(port);
+	// int	i;
+	// ss >> i;
+	// addr.sin_port = htons(i);
 
-	bind(fd, (sockaddr *) &addr, len);
+	// bind(fd, (sockaddr *) &addr, len);
 	//if (bind(fd, (struct sockaddr *) &addr, len) == -1)
 	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	listen(fd, MAX_EVENTS);
+	if (bind(fd, _server->ai_addr, _server->ai_addrlen) == -1)
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
+
+
+	if (listen(fd, MAX_EVENTS) == -1)
+		print_error(__FILE__, __LINE__, std::strerror(errno), errno); //error
+	freeaddrinfo(_server);
 	//if (listen(fd, 10) == -1) //changer 10
 	//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
 
@@ -122,7 +142,6 @@ void	Server::Launch() {
 					close(events[i].data.fd);
 					clients.erase(events[i].data.fd);
 				}
-
 				//do_use_fd(events[n].data.fd);
 				//std::cout << "else" << std::endl;
 			}

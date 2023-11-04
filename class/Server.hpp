@@ -23,8 +23,46 @@ class Server {
 	private:
 		int	fd, epollfd, number_fds;
 		struct sockaddr_in	addr;
+		struct addrinfo _hints;
+		struct addrinfo *_server;
 		std::map<int, Client>	clients;
 		struct epoll_event	ev, events[MAX_EVENTS];
+
+		class GetaddrinfoError : public std::exception{
+			public:
+				virtual const char * what() const throw(){
+					return ("getaddrinfo error");
+				}
+		};
+
+		class SocketError : public std::exception{
+			public:
+				virtual const char * what() const throw(){
+					return ("socket error");
+				}
+		};
+
+		class SetsockoptError : public std::exception{
+			public:
+				virtual const char * what() const throw(){
+					return ("setsockopt error");
+				}
+		};
+
+		class BindError : public std::exception{
+			public:
+				virtual const char * what() const throw(){
+					return ("bind error");
+				}
+		};
+
+		class ListenError : public std::exception{
+			public:
+				virtual const char * what() const throw(){
+					return ("listen error");
+				}
+		};
+
 	public:
 		Server(char *port, char *pass);
 		void	Launch();

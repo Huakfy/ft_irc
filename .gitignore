@@ -1,4 +1,6 @@
 ircserv
+local/
+.vscode/
 
 # Prerequisites
 *.d
