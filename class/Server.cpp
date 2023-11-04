@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 15:40:07 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 15:47:23 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,63 +22,63 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()
 
 	if (getaddrinfo(NULL, port, &_hints, &_server) != 0) {
 		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw GetaddrinfoError();
+		throw FunctionError();
 	}
 
 	fd = socket(_server->ai_family, _server->ai_socktype, _server->ai_protocol);
 	if (fd == -1) {
 		freeaddrinfo(_server);
 		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw SocketError();
+		throw FunctionError();
 	}
 
 	int optval = 1;
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
 		freeaddrinfo(_server);
 		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw SetsockoptError();
+		throw FunctionError();
 	}
 
 	if (bind(fd, _server->ai_addr, _server->ai_addrlen) == -1) {
 		freeaddrinfo(_server);
 		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw BindError();
+		throw FunctionError();
 	}
 
 	if (listen(fd, MAX_EVENTS) == -1) {
 		freeaddrinfo(_server);
 		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw ListenError();
+		throw FunctionError();
 	}
 	freeaddrinfo(_server);
 
 	epollfd = epoll_create1(0);
 	if (epollfd == -1) {
 		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw Epollcreate1Error();
+		throw FunctionError();
 	}
 
 	ev.events = EPOLLIN;
 	ev.data.fd = fd;
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == -1) {
 		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw EpollctlError();
+		throw FunctionError();
 	}
 
 	struct sigaction act, oldact;
 	act.sa_handler = sigint_handler;
 	if (sigemptyset(&act.sa_mask) == -1) {
 		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw SigemptysetError();
+		throw FunctionError();
 	}
 	act.sa_flags = 0;
 	if (sigaction(SIGINT, NULL, &oldact) == -1) {
 		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw SigactionError();
+		throw FunctionError();
 	}
 	if (sigaction(SIGINT, &act, NULL) == -1) {
 		print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-		throw SigactionError();
+		throw FunctionError();
 	}
 }
 

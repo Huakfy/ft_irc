@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 15:39:16 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 15:46:53 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,66 +28,10 @@ class Server {
 		std::map<int, Client>	clients;
 		struct epoll_event	ev, events[MAX_EVENTS];
 
-		class GetaddrinfoError : public std::exception{
+		class FunctionError : public std::exception{
 			public:
 				virtual const char * what() const throw(){
-					return ("getaddrinfo error");
-				}
-		};
-
-		class SocketError : public std::exception{
-			public:
-				virtual const char * what() const throw(){
-					return ("socket error");
-				}
-		};
-
-		class SetsockoptError : public std::exception{
-			public:
-				virtual const char * what() const throw(){
-					return ("setsockopt error");
-				}
-		};
-
-		class BindError : public std::exception{
-			public:
-				virtual const char * what() const throw(){
-					return ("bind error");
-				}
-		};
-
-		class ListenError : public std::exception{
-			public:
-				virtual const char * what() const throw(){
-					return ("listen error");
-				}
-		};
-
-		class Epollcreate1Error : public std::exception{
-			public:
-				virtual const char * what() const throw(){
-					return ("Epollcreate1 error");
-				}
-		};
-
-		class EpollctlError : public std::exception{
-			public:
-				virtual const char * what() const throw(){
-					return ("Epollctl error");
-				}
-		};
-
-		class SigemptysetError : public std::exception{
-			public:
-				virtual const char * what() const throw(){
-					return ("Sigemptyset error");
-				}
-		};
-
-		class SigactionError : public std::exception{
-			public:
-				virtual const char * what() const throw(){
-					return ("Sigaction error");
+					return ("Function failed");
 				}
 		};
 
