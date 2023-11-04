@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 15:47:23 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 15:58:15 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,62 +86,70 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()
 void	Server::Launch() {
 	while (1) {
 		number_fds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
-		//if (number_fds == -1)
-		//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+		if (number_fds == -1) {
+			print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+			throw FunctionError();
+		}
 
 		for (int i = 0; i < number_fds; i++) {
 			//Premiere connexion
 			if (events[i].data.fd == fd) {
-				//cfd = accept(fd, (struct sockaddr *) &peer_addr, &peer_addr_size);
-
 				sockaddr_in	peer_addr = {};
 				socklen_t	peer_addr_size = sizeof(peer_addr);
 				int	tmpfd = accept(fd, (sockaddr *) &peer_addr, &peer_addr_size);
-				//if (cfd == -1)
-				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+				if (tmpfd == -1) {
+					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+					throw FunctionError();
+				}
 
 				clients.insert(std::pair<int, Client>(fd, Client(peer_addr, peer_addr_size)));
 
-				fcntl(tmpfd, F_SETFL, O_NONBLOCK);
-				//if (fcntl(cfd, F_SETFL, O_NONBLOCK) == -1) //setnonblocking
-				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+				if (fcntl(tmpfd, F_SETFL, O_NONBLOCK) == -1) {
+					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+					throw FunctionError();
+				}
 
 				ev.events = EPOLLIN | EPOLLET;
 				ev.data.fd = tmpfd;
 
-				epoll_ctl(epollfd, EPOLL_CTL_ADD, tmpfd, &ev);
-				//if (epoll_ctl(epollfd, EPOLL_CTL_ADD, cfd, &ev) == -1)
-				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tmpfd, &ev) == -1) {
+					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+					throw FunctionError();
+				}
 
 				std::cout << "connected" << std::endl;
-
 				char *ip;
 				ip = inet_ntoa(clients.end()->second.getAddr().sin_addr);
 				std::cout << "ip: " << ip << " port: " << ntohs(clients.end()->second.getAddr().sin_port) << std::endl;
 
 				char buffer1[256], buffer2[256];
 				std::memset(&buffer2, 0, 256);
-				recv(tmpfd, buffer2, 256, 0);
-				//if (recv(cfd, buffer2, 256, 0) == -1) // verif eagain
-				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+				if (recv(tmpfd, buffer2, 256, 0) == -1 && errno != EAGAIN) {// verif pour eagain
+					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+					throw FunctionError();
+				}
 				std::cout << "Client : " << buffer2 << std::endl;
 
 				std::memset(&buffer1, 0, 256);
 				strcpy(buffer1, "Hello");
-				send(tmpfd, buffer1, 256, 0);
-				//if (send(cfd, buffer1, 256, 0) == -1)
-				//	return print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+				if (send(tmpfd, buffer1, 256, 0) == -1) {
+					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+					throw FunctionError();
+				}
 			}//deja connecté
 			else {
 				char	buffer[256];
 				std::memset(&buffer, 0, 256);
 				int rd = recv(events[i].data.fd, buffer, 256, 0);
-				std::cout << buffer << std::endl;
-				//if (rd == -1) // error
-				if (rd == 0) {
+				if (rd == -1 && errno != EAGAIN) {
+					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
+					throw FunctionError();
+				}
+				else if (rd == 0) {
 					close(events[i].data.fd);
 					clients.erase(events[i].data.fd);
 				}
+				std::cout << buffer << std::endl;
 				//do_use_fd(events[n].data.fd);
 				//std::cout << "else" << std::endl;
 			}
