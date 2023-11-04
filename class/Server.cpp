@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 15:58:15 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/04 16:17:34 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()
 		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 	fd = socket(_server->ai_family, _server->ai_socktype, _server->ai_protocol);
-	if (fd == -1) 
+	if (fd == -1)
 		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 	int optval = 1;
@@ -57,7 +57,7 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()
 
 	ev.events = EPOLLIN;
 	ev.data.fd = fd;
-	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) != -1)
+	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == -1)
 		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 	struct sigaction act, oldact;
@@ -66,10 +66,10 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()
 		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 	act.sa_flags = 0;
-	if (sigaction(SIGINT, NULL, &oldact) == -1) 
+	if (sigaction(SIGINT, NULL, &oldact) == -1)
 		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	if (sigaction(SIGINT, &act, NULL) == -1) 
+	if (sigaction(SIGINT, &act, NULL) == -1)
 		printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 }
 
@@ -77,10 +77,8 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()
 void	Server::Launch() {
 	while (1) {
 		number_fds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
-		if (number_fds == -1) {
-			print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-			throw FunctionError();
-		}
+		if (number_fds == -1)
+			printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 		for (int i = 0; i < number_fds; i++) {
 			//Premiere connexion
@@ -88,25 +86,19 @@ void	Server::Launch() {
 				sockaddr_in	peer_addr = {};
 				socklen_t	peer_addr_size = sizeof(peer_addr);
 				int	tmpfd = accept(fd, (sockaddr *) &peer_addr, &peer_addr_size);
-				if (tmpfd == -1) {
-					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-					throw FunctionError();
-				}
+				if (tmpfd == -1)
+					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 				clients.insert(std::pair<int, Client>(fd, Client(peer_addr, peer_addr_size)));
 
-				if (fcntl(tmpfd, F_SETFL, O_NONBLOCK) == -1) {
-					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-					throw FunctionError();
-				}
+				if (fcntl(tmpfd, F_SETFL, O_NONBLOCK) == -1)
+					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 				ev.events = EPOLLIN | EPOLLET;
 				ev.data.fd = tmpfd;
 
-				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tmpfd, &ev) == -1) {
-					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-					throw FunctionError();
-				}
+				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tmpfd, &ev) == -1)
+					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 
 				std::cout << "connected" << std::endl;
 				char *ip;
@@ -115,27 +107,21 @@ void	Server::Launch() {
 
 				char buffer1[256], buffer2[256];
 				std::memset(&buffer2, 0, 256);
-				if (recv(tmpfd, buffer2, 256, 0) == -1 && errno != EAGAIN) {// verif pour eagain
-					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-					throw FunctionError();
-				}
+				if (recv(tmpfd, buffer2, 256, 0) == -1 && errno != EAGAIN) // verif pour eagain
+					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 				std::cout << "Client : " << buffer2 << std::endl;
 
 				std::memset(&buffer1, 0, 256);
 				strcpy(buffer1, "Hello");
-				if (send(tmpfd, buffer1, 256, 0) == -1) {
-					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-					throw FunctionError();
-				}
+				if (send(tmpfd, buffer1, 256, 0) == -1)
+					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 			}//deja connecté
 			else {
 				char	buffer[256];
 				std::memset(&buffer, 0, 256);
 				int rd = recv(events[i].data.fd, buffer, 256, 0);
-				if (rd == -1 && errno != EAGAIN) {
-					print_error(__FILE__, __LINE__, std::strerror(errno), errno);
-					throw FunctionError();
-				}
+				if (rd == -1 && errno != EAGAIN)
+					printfunctionerror(__FILE__, __LINE__, std::strerror(errno), errno);
 				else if (rd == 0) {
 					close(events[i].data.fd);
 					clients.erase(events[i].data.fd);
