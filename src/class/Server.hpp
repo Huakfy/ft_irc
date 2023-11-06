@@ -6,14 +6,14 @@
 /*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/06 15:25:39 by echapus          ###   ########.fr       */
+/*   Updated: 2023/11/06 17:31:37 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include "Include.hpp"
+# include "ft_irc.hpp"
 # include "Client.hpp"
 # include <map>
 

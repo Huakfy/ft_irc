@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+         #
+#    By: echapus <echapus@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 11:30:07 by mjourno           #+#    #+#              #
-#    Updated: 2023/11/04 17:21:21 by mjourno          ###   ########.fr        #
+#    Updated: 2023/11/06 17:34:13 by echapus          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,11 +16,11 @@ FLAG	=	-Wall -Wextra -Werror -std=c++98 -g3
 
 #Source
 FILES	=	main Channel Client Server utils
-SRC_DIR	=
+SRC_DIR	=	src/
 OBJ_DIR	=	obj/
 
-INCLUDE	=	-I ./class -I ./
-HNAME	=	Channel Client Server Include
+INCLUDE	=	-I ./src/class -I ./include
+HNAME	=	ft_irc Channel Client Server
 HEADER	=	$(addsuffix .hpp, $(HNAME))
 
 SRCS	=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES)))
@@ -32,7 +32,7 @@ $(OBJF) :
 	@mkdir -p $(OBJ_DIR)
 
 vpath %.cpp $(SRC_DIR) $(SRC_DIR)class
-vpath %.hpp $(SRC_DIR) $(SRC_DIR)class
+vpath %.hpp include/ $(SRC_DIR)class
 
 all : $(NAME)
 

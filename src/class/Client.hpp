@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:45:18 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 17:21:54 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/06 17:31:37 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
-# include "Include.hpp"
+# include "ft_irc.hpp"
 
 class Client {
 	private:
