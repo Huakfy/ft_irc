@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 17:21:33 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/06 15:25:39 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 class Server {
 	private:
 		int	fd, epollfd, number_fds;
-		struct sockaddr_in	addr;
+		// struct sockaddr_in	addr;
 		struct addrinfo _hints;
 		struct addrinfo *_server;
 		std::map<int, Client>	clients;

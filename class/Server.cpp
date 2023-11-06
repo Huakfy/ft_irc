@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 17:11:29 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/06 15:25:50 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void Server::PrintFunctionError(std::string file, int line, std::string error, i
 	throw FunctionError();
 }
 
-Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), addr(sockaddr_in()), _hints(addrinfo()), _server(NULL), ev(epoll_event()) {
+Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), _hints(addrinfo()), _server(NULL), ev(epoll_event()) {
 
 	(void)pass; //
 
