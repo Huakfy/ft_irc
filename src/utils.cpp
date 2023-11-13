@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:28:02 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 16:23:51 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/06 17:31:37 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Include.hpp"
+#include "ft_irc.hpp"
 
 int	print_error(std::string file, int line, std::string error, int err) {
 	std::cerr << file << " line " << line - 1 << ": " << error << std::endl;

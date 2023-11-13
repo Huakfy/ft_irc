@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+         #
+#    By: echapus <echapus@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 11:30:07 by mjourno           #+#    #+#              #
-#    Updated: 2023/11/03 15:26:38 by mjourno          ###   ########.fr        #
+#    Updated: 2023/11/06 17:34:13 by echapus          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,15 +16,15 @@ FLAG	=	-Wall -Wextra -Werror -std=c++98 -g3
 
 #Source
 FILES	=	main Channel Client Server utils
-SRC_DIR	=
+SRC_DIR	=	src/
 OBJ_DIR	=	obj/
 
-INCLUDE	=	-I ./class
-HNAME	=	Channel Client Server Include
+INCLUDE	=	-I ./src/class -I ./include
+HNAME	=	ft_irc Channel Client Server
+HEADER	=	$(addsuffix .hpp, $(HNAME))
 
 SRCS	=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES)))
 OBJS	=	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES)))
-HEADER	=	$(addsuffix .hpp, $(HNAME))
 
 OBJF	=	.cache_exits
 
@@ -32,17 +32,17 @@ $(OBJF) :
 	@mkdir -p $(OBJ_DIR)
 
 vpath %.cpp $(SRC_DIR) $(SRC_DIR)class
-vpath %.hpp $(SRC_DIR) $(SRC_DIR)class
+vpath %.hpp include/ $(SRC_DIR)class
 
 all : $(NAME)
 
 $(NAME) : $(OBJS)
-	$(CC) $(FLAG) $(OBJS) -o $(NAME)
+	$(CC) $(FLAG) $(OBJS) $(INCLUDE) -o $(NAME)
 	@echo "$(GREEN)Compiled!$(DEF_COLOR)"
 	@echo "Launch the program with $(RED)./${NAME} $(DEF_COLOR)<port> <password>"
 
 $(OBJ_DIR)%.o : %.cpp $(HEADER) Makefile | $(OBJF)
-	$(CC) $(FLAG) -c $< -o $@
+	$(CC) $(FLAG) $(INCLUDE) -c $< -o $@
 
 clean :
 	@rm -rf $(OBJ_DIR)
