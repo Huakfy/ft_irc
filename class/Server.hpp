@@ -15,6 +15,7 @@
 
 # include "../Include.hpp"
 # include "Client.hpp"
+# include "Channel.hpp"
 # include <map>
 
 # define MAX_EVENTS 10
@@ -25,8 +26,10 @@ class Server {
 		struct sockaddr_in	addr;
 		struct addrinfo _hints;
 		struct addrinfo *_server;
-		std::map<int, Client>	clients;
+		std::map<int, Client*>	clients;
+		std::map<std::string, Channel> channels;
 		struct epoll_event	ev, events[MAX_EVENTS];
+		std::string _buffer;
 
 		class FunctionError : public std::exception{
 			public:
@@ -36,8 +39,9 @@ class Server {
 		};
 
 		void	PrintFunctionError(std::string file, int line, std::string error, int err);
-		int		NewClient();
-		void	ExistingClient(int i);
+		int		NewClient(void);
+		bool	GetUserInfo(int user_fd, std::string message);
+		void	ExistingClient(int user_fd);
 
 	public:
 		Server(char *port, char *pass);

@@ -19,10 +19,27 @@ class Client {
 	private:
 		sockaddr_in	addr;
 		socklen_t	addr_size;
+		std::string	_nickname;
+		std::string	_username;
+		int			user_fd;
+		std::string	_hostname;
+		std::string	_password;
+		bool		welcome;
+
 	public:
 		Client(struct sockaddr_in addr, socklen_t addr_size);
 		~Client();
 		sockaddr_in getAddr() const;
+
+		bool	getWelcome(void) const;
+		void	Welcomed(void);
+
+		void	setUsername(std::string username);
+		void	setPassword(std::string password);
+		void	setNickname(std::string nickname);
+
+		std::string	getUsername(void) const;
+		std::string	getNickname(void) const;
 };
 
 #endif
