@@ -6,7 +6,7 @@
 /*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:45:18 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/06 17:31:37 by echapus          ###   ########.fr       */
+/*   Updated: 2023/11/14 15:57:56 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ class Client {
 		socklen_t	addr_size;
 		std::string	_nickname;
 		std::string	_username;
-		int			user_fd;
+		// int			user_fd;
 		std::string	_hostname;
 		std::string	_password;
 		bool		welcome;
