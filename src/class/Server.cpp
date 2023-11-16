@@ -12,7 +12,7 @@
 
 #include "Server.hpp"
 
-void Server::PrintFunctionError(std::string file, int line, std::string error, int err){
+void	Server::PrintFunctionError(std::string file, int line, std::string error, int err){
 	if (_server)
 		freeaddrinfo(_server);
 	_server = NULL;
@@ -28,7 +28,9 @@ void Server::PrintFunctionError(std::string file, int line, std::string error, i
 
 Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), _hints(addrinfo()), _server(NULL), ev(epoll_event()) {
 
-	(void)pass; //
+	if (!pass[0])
+		PrintFunctionError(__FILE__, __LINE__, "Invalid Password", 0);
+	_pass = pass;
 
 	_hints.ai_family = AF_INET;
 	_hints.ai_socktype = SOCK_STREAM;
@@ -76,7 +78,7 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), _hints(addrinfo())
 		PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
 }
 
-int	Server::NewClient(void) {
+int		Server::NewClient(void) {
 	sockaddr_in	peer_addr = {};
 	socklen_t	peer_addr_size = sizeof(peer_addr);
 
@@ -98,6 +100,30 @@ int	Server::NewClient(void) {
 	return tmpfd;
 }
 
+void	Server::DeleteClient(int user_fd){
+	close(user_fd);
+	delete clients[user_fd];
+	clients.erase(user_fd);
+	std::cout << "client with fd " << user_fd << " has been erased" << std::endl;
+}
+/*
+	Will fill the buffer until \\r\\n is found in case of a really big message that exceed the buffer max length (512)
+*/
+bool	Server::FillBuffer(int user_fd){
+	_buffer.clear();
+	char	buffer[512];
+	std::memset(&buffer, 0, 512);
+
+	int rd = recv(events[user_fd].data.fd, buffer, 512, 0);
+	if (rd == -1 && errno != EAGAIN)
+		return false;
+	else if (rd == 0)
+		DeleteClient(events[user_fd].data.fd);
+	std::string tmp(buffer);
+	_buffer = _buffer + tmp;
+	return true;
+}
+
 bool	Server::GetUserInfo(int user_fd, std::string message){
 	std::istringstream iss(message);
 	std::string	line;
@@ -105,7 +131,8 @@ bool	Server::GetUserInfo(int user_fd, std::string message){
 	std::string	nickname;
 	std::string	username;
 
-	if (std::getline(iss, line)){
+
+	while (std::getline(iss, line)){
 		std::istringstream	linestream(line);
 		std::string			word;
 		std::string			prev;
@@ -131,44 +158,34 @@ bool	Server::GetUserInfo(int user_fd, std::string message){
 			}
 			prev = word;
 		}
+		linestream.clear();
 	}
-	clients[user_fd]->setNickname(nickname); // verification necessaire pour validité des nick pass et user
+	// verification necessaire pour validité des nick pass et user
+	if (!clients[user_fd]->setNickname(nickname)) 
+		return std::cout << "bad nickname" << std::endl, false; 
+	if (password != _pass)
+		return std::cout << "wrong password" << std::endl, false;
 	clients[user_fd]->setPassword(password);
-	clients[user_fd]->setUsername(username);
+	if (!clients[user_fd]->setUsername(username))
+		return std::cout << "bad username" << std::endl, false;
+	clients[user_fd]->setfd(user_fd);
 	return true;
 }
 
 void	Server::ExistingClient(int user_fd) {
 	int	user_data_fd = events[user_fd].data.fd;
 
-	std::cout << "Existing Client fd " << user_fd << std::endl;
-	while (_buffer.find("\r\n") == std::string::npos){
-		char	buffer[512];
-		std::memset(&buffer, 0, 512);
-
-		int rd = recv(events[user_fd].data.fd, buffer, 512, 0);
-		if (rd == -1 && errno != EAGAIN)
-			return;
-			// PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
-		else if (rd == 0) {
-			close(user_data_fd);
-			delete clients[user_data_fd];
-			clients.erase(user_data_fd);
-			std::cout << "client with fd " << user_fd << " has been erased" << std::endl;
-		}
-		std::string tmp(buffer);
-		_buffer = _buffer + tmp;
-		std::cout << "While \\r\\n not found : `" << _buffer << "`" << std::endl;
-	}
-	std::cout << "Buffer = `" << _buffer << "`" << std::endl;
+	if (!FillBuffer(user_fd))
+		return ;
+	std::cout << "<Server Buffer[" << user_fd << "]> - " << _buffer << "<Server Buffer end>" << std::endl;
 	std::string message(_buffer);
 	_buffer.clear();
 	if (!clients[user_data_fd]->getWelcome()){
 		if (!GetUserInfo(user_data_fd, message)){
 			std::string error = "Wrong format, can't connect";
 			send(user_data_fd, error.c_str(), error.size(), 0);
-			// close(user_data_fd); // est-ce qu'on le close ?
-			// clients.erase(user_data_fd); //est-ce qu'on le supprime ?
+			DeleteClient(user_data_fd);
+			return ;
 		}
 		std::string welcome = 	"001 " + clients[user_data_fd]->getUsername() + " " + clients[user_data_fd]->getNickname() + " "\
 								": Welcome to our Server. A echapus & mjourno network !\r\n";
@@ -201,11 +218,9 @@ void	Server::Launch() {
 				char *ip;
 				ip = inet_ntoa(clients[tmpfd]->getAddr().sin_addr); //verif return value
 				std::cout << "ip: " << ip << " port: " << ntohs(clients[tmpfd]->getAddr().sin_port) << std::endl;
-
 			}//deja connecté
-			else {
+			else
 				ExistingClient(i);
-			}
 		}
 	}
 }

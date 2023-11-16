@@ -39,6 +39,9 @@
 
 # include <string>
 
+# include <vector>
+# include <map>
+
 class SigInt : public std::exception {
 	virtual const char *what() const throw() {
 		return "Ctrl + C";

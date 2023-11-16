@@ -30,6 +30,7 @@ class Server {
 		std::map<std::string, Channel> channels;
 		struct epoll_event	ev, events[MAX_EVENTS];
 		std::string _buffer;
+		std::string _pass;
 
 		class FunctionError : public std::exception{
 			public:
@@ -40,6 +41,8 @@ class Server {
 
 		void	PrintFunctionError(std::string file, int line, std::string error, int err);
 		int		NewClient(void);
+		void	DeleteClient(int user_fd);
+		bool	FillBuffer(int user_fd);
 		bool	GetUserInfo(int user_fd, std::string message);
 		void	ExistingClient(int user_fd);
 

@@ -21,7 +21,7 @@ class Client {
 		socklen_t	addr_size;
 		std::string	_nickname;
 		std::string	_username;
-		// int			user_fd;
+		int			user_fd;
 		std::string	_hostname;
 		std::string	_password;
 		bool		welcome;
@@ -34,12 +34,14 @@ class Client {
 		bool	getWelcome(void) const;
 		void	Welcomed(void);
 
-		void	setUsername(std::string username);
+		bool	setUsername(std::string username);
 		void	setPassword(std::string password);
-		void	setNickname(std::string nickname);
+		bool	setNickname(std::string nickname);
+		void	setfd(int fd);
 
 		std::string	getUsername(void) const;
 		std::string	getNickname(void) const;
+		int			getfd(void) const;
 };
 
 #endif
