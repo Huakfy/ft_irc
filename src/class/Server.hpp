@@ -43,7 +43,7 @@ class Server {
 		int		NewClient(void);
 		void	DeleteClient(int user_fd);
 		bool	FillBuffer(int user_fd);
-		bool	GetUserInfo(int user_fd, std::string message);
+		bool	GetClientInfo(int user_fd, std::string message);
 		void	ExistingClient(int user_fd);
 
 	public:

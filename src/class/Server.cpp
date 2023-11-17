@@ -106,9 +106,7 @@ void	Server::DeleteClient(int user_fd){
 	clients.erase(user_fd);
 	std::cout << "client with fd " << user_fd << " has been erased" << std::endl;
 }
-/*
-	Will fill the buffer until \\r\\n is found in case of a really big message that exceed the buffer max length (512)
-*/
+
 bool	Server::FillBuffer(int user_fd){
 	_buffer.clear();
 	char	buffer[512];
@@ -118,13 +116,13 @@ bool	Server::FillBuffer(int user_fd){
 	if (rd == -1 && errno != EAGAIN)
 		return false;
 	else if (rd == 0)
-		DeleteClient(events[user_fd].data.fd);
+		return DeleteClient(events[user_fd].data.fd), false;
 	std::string tmp(buffer);
-	_buffer = _buffer + tmp;
+	_buffer = tmp;
 	return true;
 }
 
-bool	Server::GetUserInfo(int user_fd, std::string message){
+bool	Server::GetClientInfo(int user_fd, std::string message){
 	std::istringstream iss(message);
 	std::string	line;
 	std::string	password;
@@ -163,11 +161,14 @@ bool	Server::GetUserInfo(int user_fd, std::string message){
 	// verification necessaire pour validité des nick pass et user
 	if (!clients[user_fd]->setNickname(nickname)) 
 		return std::cout << "bad nickname" << std::endl, false; 
+
 	if (password != _pass)
 		return std::cout << "wrong password" << std::endl, false;
 	clients[user_fd]->setPassword(password);
+
 	if (!clients[user_fd]->setUsername(username))
 		return std::cout << "bad username" << std::endl, false;
+
 	clients[user_fd]->setfd(user_fd);
 	return true;
 }
@@ -181,7 +182,7 @@ void	Server::ExistingClient(int user_fd) {
 	std::string message(_buffer);
 	_buffer.clear();
 	if (!clients[user_data_fd]->getWelcome()){
-		if (!GetUserInfo(user_data_fd, message)){
+		if (!GetClientInfo(user_data_fd, message)){
 			std::string error = "Wrong format, can't connect";
 			send(user_data_fd, error.c_str(), error.size(), 0);
 			DeleteClient(user_data_fd);
@@ -196,6 +197,11 @@ void	Server::ExistingClient(int user_fd) {
 	if (!message.empty()){
 		std::cout << "Suite des opérations plus tard pour l'instant voilà le reste du message : " << std::endl;
 		std::cout << message;
+		// if (message.find("PING") != std::string::npos){
+		// 	std::string pong = clients[user_data_fd]->getNickname() + " PONG " + clients[user_data_fd]->getUsername();
+		// 	std::cout << pong << std::endl;
+		// 	send(user_data_fd, pong.c_str(), pong.size(), 0);
+		// }
 	}
 	message.clear();
 }

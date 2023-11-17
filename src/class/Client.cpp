@@ -40,8 +40,6 @@ bool	Client::setNickname(std::string nickname) {
 	unsigned int	index = 0;
 	std::string		must_not = " .,*?!@";
 	
-	std::cout << "setnickname check `" << nickname << "`" << std::endl;
-
 	if (nickname.empty() || nickname[index] == '$' || nickname[index] == ':')
 		return false;
 	while (nickname[++index]){
