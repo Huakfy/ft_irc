@@ -44,6 +44,10 @@
 
 # define CRLF std::string("\r\n")
 
+# define RECV 0
+# define SEND 1
+# define LOGS 2
+
 class SigInt : public std::exception {
 	virtual const char *what() const throw() {
 		return "Ctrl + C";

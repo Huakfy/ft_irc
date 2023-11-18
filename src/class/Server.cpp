@@ -99,12 +99,28 @@ int		Server::NewClient(void) {
 
 	return tmpfd;
 }
+/*
+	mode : RECV after recv func, SEND before send func, LOGS for other
+*/
+void	Server::printlog(std::string msg, int mode){
+	std::string server;
+	if (mode == RECV)
+		server = "\033[0;92m<Server REVC>"; // GREEN
+	else if (mode == SEND)
+		server = "\033[0;94m<Server SEND>"; // BLUE
+	else
+		server = "\033[0;91m<SERVER LOGS>"; // RED
+
+	std::cout << server << "\033[0;39m " << msg; // RESET color
+	if (msg.find('\n') == std::string::npos)
+		std::cout << std::endl;
+}
 
 void	Server::DeleteClient(int user_fd){
 	close(user_fd);
 	delete clients[user_fd];
 	clients.erase(user_fd);
-	std::cout << "client with fd " << user_fd << " has been erased" << std::endl;
+	std::cout << "\033[0;91m<Server>\033[0;39m client with fd " << user_fd << " has been erased" << std::endl;
 }
 
 bool	Server::FillBuffer(int user_fd){
@@ -127,25 +143,13 @@ void	Server::ExistingClient(int user_fd) {
 
 	if (!FillBuffer(user_fd))
 		return ;
-	std::cout << "<Server Buffer[" << user_fd << "]> - " << _buffer << "<Server Buffer end>" << std::endl;
+	printlog(_buffer, RECV);
 	std::string message(_buffer);
 	_buffer.clear();
 
 	Client *client = clients[user_data_fd];
 	client->setfd(user_data_fd);
-	// if (!client.getWelcome()){
-	// 	if (!GetClientInfo(user_data_fd, message)){
-	// 		std::string error = "Wrong format, can't connect" + CRLF;
-	// 		send(user_data_fd, error.c_str(), error.size(), 0);
-	// 		DeleteClient(user_data_fd);
-	// 		return ;
-	// 	}
-	// 	std::string welcome = 	"001 " + client.getUsername() + " " + client.getNickname() +
-	// 							" : Welcome to our Server. A echapus & mjourno network !" + CRLF;
-	// 	send(user_data_fd, welcome.c_str(), welcome.size(), 0);
-	// 	client.Welcomed();
-	// 	return ;
-	// }
+
 	if (!message.empty())
 		parse_command(message, client);
 	message.clear();

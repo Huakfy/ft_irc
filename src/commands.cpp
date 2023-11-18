@@ -18,14 +18,14 @@ void	Server::invite(std::vector<std::string> &args, Client *client){ std::cout <
 void	Server::topic(std::vector<std::string> &args, Client *client){ std::cout << "<topic>" << std::endl; (void)args; (void)client;}
 
 void	Server::nick(std::vector<std::string> &args, Client *client){
-	std::cout << "<nick>" << std::endl; (void)args; (void)client;
+	printlog("Entering NICK func", LOGS);
 	std::string error;
 	if (args.size() == 1 || !client->checkNickname(args[1])){
 		if (args.size() == 1)
 			error = "431 : No nickname given" + CRLF;
 		else
 			error = "432 : Erroneous nickname" + CRLF;
-		std::cout << error;
+		printlog(error, SEND);
 		send(client->getfd(), error.c_str(), error.size(), 0);
 		throw FunctionError();
 	}
@@ -33,6 +33,7 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it){
 		if (it->second->getNickname() == args[1]){
 			error = "433 : Nickname alredy in use" + CRLF;
+			printlog(error, LOGS);
 			send(client->getfd(), error.c_str(), error.size(), 0);
 			throw FunctionError();
 		}
@@ -40,7 +41,7 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 
 	if (client->getNickname().empty()){
 		std::string welcome = 	"001 " + args[1] + " :Welcome to our Server. A echapus & mjourno network !" + CRLF; // on grade l'espace avant les ':' mais pas celui après pour que ça soit plus propre
-		std::cout << welcome;
+		printlog(welcome, SEND);
 		send(client->getfd(), welcome.c_str(), welcome.size(), 0);
 	}
 	client->setNickname(args[1]);
@@ -48,10 +49,10 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 }
 
 void	Server::user(std::vector<std::string> &args, Client *client){
-	std::cout << "<user>" << std::endl; (void)args; (void)client;
+	printlog("Entering USER func", LOGS);
 	if (args.size() != 5){
 		std::string error = "461 : Not Enough parameters" + CRLF;
-		std::cout << error;
+		printlog(error, SEND);
 		send(client->getfd(), error.c_str(), error.size(), 0);
 		throw FunctionError();
 	}
@@ -60,10 +61,10 @@ void	Server::user(std::vector<std::string> &args, Client *client){
 }
 
 void	Server::pass(std::vector<std::string> &args, Client *client){
-	std::cout << "<pass>" << std::endl;
+	printlog("Entering PASS func", LOGS);
 	if (args.size() == 1 || args[1] != _pass){
 		std::string error = "464 : Incorrect password" + CRLF;
-		std::cout << error;
+		printlog(error, SEND);
 		send(client->getfd(), error.c_str(), error.size(), 0);
 		DeleteClient(client->getfd());
 		throw FunctionError();
@@ -72,10 +73,10 @@ void	Server::pass(std::vector<std::string> &args, Client *client){
 }
 
 void	Server::whois(std::vector<std::string> &args, Client *client){
-	std::cout << "<whois>" << std::endl;
+	printlog("Entering WHOIS func", LOGS);
 	if (args.size() != 2){
 		std::string error = "461 : Not enough parameters" + CRLF;
-		std::cout << error;
+		printlog(error, SEND);
 		send(client->getfd(), error.c_str(), error.size(), 0);
 		throw FunctionError();
 	}
@@ -90,13 +91,14 @@ void	Server::whois(std::vector<std::string> &args, Client *client){
 		reply += "318" + client->getNickname() + " : End of WHOIS list" + CRLF;
 		send(client->getfd(), reply.c_str(), reply.size(), 0);
 	}
-	std::cout << reply;
+	printlog(reply, SEND);
 }
 
 void	Server::pong(std::vector<std::string> &args, Client *client){
 	args.clear();
-	std::cout << "<pong>" << std::endl;
+	printlog("Entering PONG func", LOGS);
 	std::string reply = "PONG " + client->getNickname() + CRLF;
+	printlog(reply, SEND);
 	send(client->getfd(), reply.c_str(), reply.size(), 0);
 }
 
@@ -132,7 +134,7 @@ void	Server::parse_command(std::string args, Client *client){
 		std::vector<std::string>	args = split(line);
 		std::string					cmd = args[0];
 
-		debug_buff(args);
+		// debug_buff(args);
 
 		std::map<std::string, Server::Command>::iterator it = cmdMap.find(cmd); //comme une envie de mettre 'auto'
 		if (it != cmdMap.end()){
@@ -146,7 +148,7 @@ void	Server::parse_command(std::string args, Client *client){
 					error = "464 " + client->getNickname() + " :Incorrect password" + CRLF;
 				else
 					error = "451 " + client->getNickname() + " :You have not registered" + CRLF;
-				std::cout << error;
+				printlog(error, SEND);
 				send(client->getfd(), error.c_str(), error.size(), 0);
 				DeleteClient(client->getfd());
 			}
