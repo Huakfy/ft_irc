@@ -122,57 +122,6 @@ bool	Server::FillBuffer(int user_fd){
 	return true;
 }
 
-bool	Server::GetClientInfo(int user_fd, std::string message){
-	std::istringstream iss(message);
-	std::string	line;
-	std::string	password;
-	std::string	nickname;
-	std::string	username;
-
-
-	while (std::getline(iss, line)){
-		std::istringstream	linestream(line);
-		std::string			word;
-		std::string			prev;
-
-		while (linestream >> word){
-			if (prev == "PASS"){
-				if (!word.empty() && word != "NICK" && word !="USER")
-					password = word;
-				else
-					return std::cout << "FAIL PASS" << std::endl, false;
-			}
-			else if (prev == "NICK"){
-				if (!word.empty() && word != "PASS" && word !="USER")
-					nickname = word;
-				else
-					return std::cout << "FAIL NICK" << std::endl, false;
-			}
-			else if (prev == "USER"){
-				if (!word.empty() && word != "PASS" && word !="NICK")
-					username = word;
-				else
-					return std::cout << "FAIL USER" << std::endl, false;
-			}
-			prev = word;
-		}
-		linestream.clear();
-	}
-	// verification necessaire pour validité des nick pass et user
-	if (!clients[user_fd]->setNickname(nickname)) 
-		return std::cout << "bad nickname" << std::endl, false; 
-
-	if (password != _pass)
-		return std::cout << "wrong password" << std::endl, false;
-	clients[user_fd]->setPassword(password);
-
-	if (!clients[user_fd]->setUsername(username))
-		return std::cout << "bad username" << std::endl, false;
-
-	clients[user_fd]->setfd(user_fd);
-	return true;
-}
-
 void	Server::ExistingClient(int user_fd) {
 	int	user_data_fd = events[user_fd].data.fd;
 
@@ -181,35 +130,31 @@ void	Server::ExistingClient(int user_fd) {
 	std::cout << "<Server Buffer[" << user_fd << "]> - " << _buffer << "<Server Buffer end>" << std::endl;
 	std::string message(_buffer);
 	_buffer.clear();
-	if (!clients[user_data_fd]->getWelcome()){
-		if (!GetClientInfo(user_data_fd, message)){
-			std::string error = "Wrong format, can't connect";
-			send(user_data_fd, error.c_str(), error.size(), 0);
-			DeleteClient(user_data_fd);
-			return ;
-		}
-		std::string welcome = 	"001 " + clients[user_data_fd]->getUsername() + " " + clients[user_data_fd]->getNickname() + " "\
-								": Welcome to our Server. A echapus & mjourno network !\r\n";
-		send(user_data_fd, welcome.c_str(), welcome.size(), 0);
-		clients[user_data_fd]->Welcomed();
-		return ;
-	}
-	if (!message.empty()){
-		std::cout << "Suite des opérations plus tard pour l'instant voilà le reste du message : " << std::endl;
-		std::cout << message;
-		// if (message.find("PING") != std::string::npos){
-		// 	std::string pong = clients[user_data_fd]->getNickname() + " PONG " + clients[user_data_fd]->getUsername();
-		// 	std::cout << pong << std::endl;
-		// 	send(user_data_fd, pong.c_str(), pong.size(), 0);
-		// }
-	}
+
+	Client *client = clients[user_data_fd];
+	client->setfd(user_data_fd);
+	// if (!client.getWelcome()){
+	// 	if (!GetClientInfo(user_data_fd, message)){
+	// 		std::string error = "Wrong format, can't connect" + CRLF;
+	// 		send(user_data_fd, error.c_str(), error.size(), 0);
+	// 		DeleteClient(user_data_fd);
+	// 		return ;
+	// 	}
+	// 	std::string welcome = 	"001 " + client.getUsername() + " " + client.getNickname() +
+	// 							" : Welcome to our Server. A echapus & mjourno network !" + CRLF;
+	// 	send(user_data_fd, welcome.c_str(), welcome.size(), 0);
+	// 	client.Welcomed();
+	// 	return ;
+	// }
+	if (!message.empty())
+		parse_command(message, client);
 	message.clear();
 }
 
 
 void	Server::Launch() {
 	while (1) {
-		number_fds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
+		number_fds = epoll_wait(epollfd, events, MAX_EVENTS, -1); // maxevent à mettre à 1 quand 2 events simultanés pour evité segfault
 		if (number_fds == -1)
 			PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
 
@@ -219,7 +164,6 @@ void	Server::Launch() {
 				int tmpfd = NewClient();
 
 				//tests
-				std::cout << clients[tmpfd]->getWelcome() << " est le status de welcome pour le client fd " << tmpfd << std::endl;
 				std::cout << "connected with fd " << tmpfd << std::endl;
 				char *ip;
 				ip = inet_ntoa(clients[tmpfd]->getAddr().sin_addr); //verif return value

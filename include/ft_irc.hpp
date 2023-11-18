@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef INCLUDE_HPP
-# define INCLUDE_HPP
+#ifndef FT_IRC_HPP
+# define FT_IRC_HPP
 
 # include <sstream>
 
@@ -42,6 +42,8 @@
 # include <vector>
 # include <map>
 
+# define CRLF std::string("\r\n")
+
 class SigInt : public std::exception {
 	virtual const char *what() const throw() {
 		return "Ctrl + C";
@@ -50,5 +52,7 @@ class SigInt : public std::exception {
 
 int		print_error(std::string file, int line, std::string error, int err);
 void	sigint_handler(int signum);
+
+std::vector<std::string>	split(std::string str);
 
 #endif

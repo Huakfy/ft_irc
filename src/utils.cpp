@@ -21,3 +21,13 @@ void	sigint_handler(int signum) {
 	throw SigInt();
 	(void)signum;
 }
+
+std::vector<std::string>	split(std::string str){
+	std::vector<std::string>	spl;
+	std::istringstream			iss(str);
+	std::string					word;
+	
+	while (iss >> word)
+		spl.push_back(word);
+	return spl;
+}

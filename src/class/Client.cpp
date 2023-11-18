@@ -12,7 +12,7 @@
 
 #include "Client.hpp"
 
-Client::Client(struct sockaddr_in address, socklen_t address_size) : addr(sockaddr_in()), addr_size(sizeof(addr)), welcome(false) {
+Client::Client(struct sockaddr_in address, socklen_t address_size) : addr(sockaddr_in()), addr_size(sizeof(addr)), auth(false), registered(false) {
 	addr = address;
 	addr_size = address_size;
 }
@@ -25,18 +25,8 @@ sockaddr_in Client::getAddr() const {
 	return addr;
 }
 
-void Client::Welcomed(void) { welcome = true; }
 
-bool Client::getWelcome(void) const { return welcome; }
-
-bool	Client::setUsername(std::string username) {
-	if (username.empty())
-		return false;
-	_username = username;
-	return true;
-}
-
-bool	Client::setNickname(std::string nickname) {
+bool	Client::checkNickname(std::string nickname) {
 	unsigned int	index = 0;
 	std::string		must_not = " .,*?!@";
 	
@@ -46,13 +36,20 @@ bool	Client::setNickname(std::string nickname) {
 		if (must_not.find(nickname[index]) != std::string::npos)
 			return false;
 	}
-	_nickname = nickname;
 	return true;
 }
 
+void	Client::setUsername(std::string username) { _username = username; }
+void	Client::setNickname(std::string nickname) { _nickname = nickname; }
 void	Client::setPassword(std::string password) { _password = password; }
+void	Client::setRealname(std::string real) { _real = real; }
 void	Client::setfd(int fd) { user_fd = fd; }
+void	Client::setAuth(void) { auth = true; }
+void	Client::setRegister(void) { registered = true; }
 
 std::string	Client::getUsername(void) const { return _username; }
 std::string	Client::getNickname(void) const { return _nickname; }
+std::string	Client::getRealname(void) const { return _real; }
 int			Client::getfd(void) const { return user_fd; }
+bool		Client::getAuth(void) const { return auth; }
+bool		Client::getRegister(void) const { return registered; }

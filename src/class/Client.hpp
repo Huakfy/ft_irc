@@ -21,27 +21,33 @@ class Client {
 		socklen_t	addr_size;
 		std::string	_nickname;
 		std::string	_username;
-		int			user_fd;
-		std::string	_hostname;
 		std::string	_password;
-		bool		welcome;
+		std::string	_real;
+		int			user_fd;
+		bool		auth;
+		bool		registered;
 
 	public:
 		Client(struct sockaddr_in addr, socklen_t addr_size);
 		~Client();
 		sockaddr_in getAddr() const;
 
-		bool	getWelcome(void) const;
-		void	Welcomed(void);
+		bool	checkNickname(std::string nickname);
 
-		bool	setUsername(std::string username);
+		void	setUsername(std::string username);
 		void	setPassword(std::string password);
-		bool	setNickname(std::string nickname);
+		void	setNickname(std::string nickname);
+		void	setRealname(std::string realname);
 		void	setfd(int fd);
+		void	setAuth(void);
+		void	setRegister(void);
 
 		std::string	getUsername(void) const;
 		std::string	getNickname(void) const;
+		std::string	getRealname(void) const;
 		int			getfd(void) const;
+		bool		getAuth(void) const;
+		bool		getRegister(void) const;
 };
 
 #endif

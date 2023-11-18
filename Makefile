@@ -12,10 +12,10 @@
 
 NAME	=	ircserv
 CC		=	c++
-FLAG	=	-Wall -Wextra -Werror -std=c++98 -g3
+FLAG	=	-Wall -Wextra -Werror -pedantic -std=c++98 -g3
 
 #Source
-FILES	=	main Channel Client Server utils
+FILES	=	main Channel Client Server utils commands
 SRC_DIR	=	src/
 OBJ_DIR	=	obj/
 
