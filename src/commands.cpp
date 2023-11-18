@@ -39,7 +39,7 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 	}
 
 	if (client->getNickname().empty()){
-		std::string welcome = 	"001 " + args[1] + " : Welcome to our Server. A echapus & mjourno network !" + CRLF;
+		std::string welcome = 	"001 " + args[1] + " :Welcome to our Server. A echapus & mjourno network !" + CRLF; // on grade l'espace avant les ':' mais pas celui après pour que ça soit plus propre
 		std::cout << welcome;
 		send(client->getfd(), welcome.c_str(), welcome.size(), 0);
 	}
