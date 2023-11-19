@@ -22,9 +22,9 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 	std::string error;
 	if (args.size() == 1 || !client->checkNickname(args[1])){
 		if (args.size() == 1)
-			error = "431 : No nickname given" + CRLF;
+			error = "431 :No nickname given" + CRLF;
 		else
-			error = "432 : Erroneous nickname" + CRLF;
+			error = "432 :Erroneous nickname" + CRLF;
 		printlog(error, SEND);
 		send(client->getfd(), error.c_str(), error.size(), 0);
 		throw FunctionError();
@@ -32,7 +32,7 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 
 	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it){
 		if (it->second->getNickname() == args[1]){
-			error = "433 : Nickname alredy in use" + CRLF;
+			error = "433 :Nickname alredy in use" + CRLF;
 			printlog(error, LOGS);
 			send(client->getfd(), error.c_str(), error.size(), 0);
 			throw FunctionError();
@@ -44,6 +44,11 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 		printlog(welcome, SEND);
 		send(client->getfd(), welcome.c_str(), welcome.size(), 0);
 	}
+	else{
+		std::string reply = "!" +  client->getNickname() + " NICK " + args[1];
+		printlog(reply, LOGS);
+		send(client->getfd(), reply.c_str(), reply.size(), 0); // il faudrait envoyer à tout les user qui connaissent le boug qui vient de se reNick
+	}
 	client->setNickname(args[1]);
 	client->setRegister();
 }
@@ -51,19 +56,22 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 void	Server::user(std::vector<std::string> &args, Client *client){
 	printlog("Entering USER func", LOGS);
 	if (args.size() != 5){
-		std::string error = "461 : Not Enough parameters" + CRLF;
+		std::string error = "461 :Not Enough parameters" + CRLF;
 		printlog(error, SEND);
 		send(client->getfd(), error.c_str(), error.size(), 0);
 		throw FunctionError();
 	}
 	client->setUsername(args[1]);
-	client->setRealname(args[4]);
+	std::string realname;
+	for (unsigned int index = 4; index < args.size(); ++index)
+		realname += args[index];
+	client->setRealname(realname);
 }
 
 void	Server::pass(std::vector<std::string> &args, Client *client){
 	printlog("Entering PASS func", LOGS);
 	if (args.size() == 1 || args[1] != _pass){
-		std::string error = "464 : Incorrect password" + CRLF;
+		std::string error = "464 :Incorrect password" + CRLF; // or needmoreparams osef on pas se mytho
 		printlog(error, SEND);
 		send(client->getfd(), error.c_str(), error.size(), 0);
 		DeleteClient(client->getfd());
@@ -75,7 +83,7 @@ void	Server::pass(std::vector<std::string> &args, Client *client){
 void	Server::whois(std::vector<std::string> &args, Client *client){
 	printlog("Entering WHOIS func", LOGS);
 	if (args.size() != 2){
-		std::string error = "461 : Not enough parameters" + CRLF;
+		std::string error = "461 :Not enough parameters" + CRLF;
 		printlog(error, SEND);
 		send(client->getfd(), error.c_str(), error.size(), 0);
 		throw FunctionError();
@@ -83,12 +91,12 @@ void	Server::whois(std::vector<std::string> &args, Client *client){
 	std::string reply;
 	if (args[1] == client->getNickname()){
 		reply = "311 " + client->getNickname() + " " + client->getUsername() + " * :" + client->getRealname() + CRLF;
-		reply += "318 " + client->getNickname() + " : End of WHOIS list" + CRLF;
+		reply += "318 " + client->getNickname() + " :End of WHOIS list" + CRLF;
 		send(client->getfd(), reply.c_str(), reply.size(), 0);
 	}
 	else{
-		reply = "401 " + client->getNickname() + ": No such nick" + CRLF;
-		reply += "318" + client->getNickname() + " : End of WHOIS list" + CRLF;
+		reply = "401 " + client->getNickname() + ":No such nick" + CRLF;
+		reply += "318" + client->getNickname() + " :End of WHOIS list" + CRLF;
 		send(client->getfd(), reply.c_str(), reply.size(), 0);
 	}
 	printlog(reply, SEND);

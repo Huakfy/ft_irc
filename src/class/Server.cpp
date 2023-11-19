@@ -120,7 +120,7 @@ void	Server::DeleteClient(int user_fd){
 	close(user_fd);
 	delete clients[user_fd];
 	clients.erase(user_fd);
-	std::cout << "\033[0;91m<Server>\033[0;39m client with fd " << user_fd << " has been erased" << std::endl;
+	std::cout << "\033[0;91m<Server LOGS>\033[0;39m client with fd " << user_fd << " has been erased" << std::endl;
 }
 
 bool	Server::FillBuffer(int user_fd){

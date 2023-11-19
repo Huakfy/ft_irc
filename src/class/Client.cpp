@@ -30,7 +30,7 @@ bool	Client::checkNickname(std::string nickname) {
 	unsigned int	index = 0;
 	std::string		must_not = " .,*?!@";
 	
-	if (nickname.empty() || nickname[index] == '$' || nickname[index] == ':')
+	if (nickname.empty() || nickname[index] == '$' || nickname[index] == ':' || nickname[index] == '#')
 		return false;
 	while (nickname[++index]){
 		if (must_not.find(nickname[index]) != std::string::npos)
