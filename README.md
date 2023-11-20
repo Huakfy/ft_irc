@@ -9,3 +9,5 @@ besoin de fixé la longueur d'un username + ça doit être dit avec le rpl welco
 > PASS pass <br>
 > NICK pass <br>
 > USER david david 127.0.0.1 :david <br>
+
+https://modern.ircdocs.horse/
