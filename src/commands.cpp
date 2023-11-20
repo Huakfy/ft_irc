@@ -9,12 +9,55 @@ void	Server::kick(std::vector<std::string> &args, Client *client){ std::cout << 
 
 void	Server::part(std::vector<std::string> &args, Client *client){ std::cout << "<part>" << std::endl; (void)args; (void)client;}
 
-void	Server::join(std::vector<std::string> &args, Client *client){ std::cout << "<join>" << std::endl; (void)args; (void)client;}
+void	Server::join(std::vector<std::string> &args, Client *client){
+	printlog("Entering JOIN func", LOGS);
+
+	if (args.size() == 1){
+		std::string error = "461 :Not Enough parameters" + CRLF;
+		printlog(error, SEND);
+		send(client->getfd(), error.c_str(), error.size(), 0);
+		throw FunctionError();
+	}
+	args.erase(args.begin());
+	// faire JOIN 0 ? (0 permet de leave tout les channels desquels tu faisais parti en envoyant la commande PART à ta place)
+	// retirer le 0 du vect si on le fait ou simplement args.erase(args.begin()) puisqu'un autre erase va être fait après quoi qu'il arrive donc 2 erase donc ce qu'on veut au final
+	std::vector<std::string>	chans = parseArgs(args[1]);
+	std::vector<std::string>	passwords;
+	if (args.size() == 2) // pour que cette ligne fonctionne
+		passwords = parseArgs(args[2]);
+	while (passwords.size() != chans.size())
+		passwords.push_back("");
+	// big brain in coming
+	for (size_t i = 0; i < chans.size(); ++i){
+		std::map<std::string, Channel *>::iterator it = channels.find(chans[i]);
+		std::string	reply;
+		// channel existe pas
+		if (it == channels.end()){
+			channels.insert(std::pair<std::string, Channel *>(chans[i], new Channel(chans[i], client->getNickname(), passwords[i], *client)));
+			reply = ":" + client->getNickname() + " JOIN " + chans[i];
+			printlog(reply, LOGS);
+			send(client->getfd(), reply.c_str(), reply.size(), 0);
+		}
+		// channel existe gg à toi t'as bien suivi xD
+		else{
+			// faut faire des verifs ici avec les password et tout ça tmtc
+		}
+		// enovyer le topic si topic set (je vois pas comment lancer topic autrement)
+		if (!channels[chans[i]]->getTopic().empty()){
+			std::vector<std::string> top;
+			top.push_back("TOPIC");
+			top.push_back(chans[i]);
+			topic(top, client);
+		}
+		// https://modern.ircdocs.horse/#rplnamreply-353
+	}
+}
 
 void	Server::privmsg(std::vector<std::string> &args, Client *client){ std::cout << "<privmsg>" << std::endl; (void)args; (void)client;}
 
 void	Server::invite(std::vector<std::string> &args, Client *client){ std::cout << "<invite>" << std::endl; (void)args; (void)client;}
 
+// utiliser rebuilt pour les autres params de topic tqt fait moi confiance
 void	Server::topic(std::vector<std::string> &args, Client *client){ std::cout << "<topic>" << std::endl; (void)args; (void)client;}
 
 void	Server::nick(std::vector<std::string> &args, Client *client){
@@ -117,8 +160,8 @@ void	debug_buff(std::vector<std::string> buff){
 	std::cout << std::endl;
 }
 
-void	Server::parse_command(std::string args, Client *client){
-	std::istringstream	iss(args);
+void	Server::parse_command(std::string str, Client *client){
+	std::istringstream	iss(str);
 	std::string			line;
 	std::map<std::string, Server::Command>	cmdMap;
 

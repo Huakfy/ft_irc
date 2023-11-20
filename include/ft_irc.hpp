@@ -57,6 +57,9 @@ class SigInt : public std::exception {
 int		print_error(std::string file, int line, std::string error, int err);
 void	sigint_handler(int signum);
 
+std::string	rebuilt(std::vector<std::string> args);
+
 std::vector<std::string>	split(std::string str);
+std::vector<std::string>	parseArgs(std::string msg);
 
 #endif
