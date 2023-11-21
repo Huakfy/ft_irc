@@ -41,6 +41,9 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 		// channel existe gg à toi t'as bien suivi xD
 		else{
 			// faut faire des verifs ici avec les password et tout ça tmtc
+			// ERR_BADCHANNELKEY (475) mauvais mdp
+			// ERR_CHANNELISFULL (471) channel remplie
+			// ERR_INVITEONLYCHAN (473) channel invite mode only but user not invited
 		}
 		// enovyer le topic si topic set (je vois pas comment lancer topic autrement)
 		if (!channels[chans[i]]->getTopic().empty()){
@@ -50,6 +53,8 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 			topic(top, client);
 		}
 		// https://modern.ircdocs.horse/#rplnamreply-353
+		// RPL_NAMREPLY (353)
+		// RPL_ENDOFNAMES (366) comme WHOIS la merde
 	}
 }
 
@@ -98,7 +103,7 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 
 void	Server::user(std::vector<std::string> &args, Client *client){
 	printlog("Entering USER func", LOGS);
-	if (args.size() != 5){
+	if (args.size() <= 5){
 		std::string error = "461 :Not Enough parameters" + CRLF;
 		printlog(error, SEND);
 		send(client->getfd(), error.c_str(), error.size(), 0);

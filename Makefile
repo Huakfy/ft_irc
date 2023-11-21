@@ -6,13 +6,13 @@
 #    By: echapus <echapus@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 11:30:07 by mjourno           #+#    #+#              #
-#    Updated: 2023/11/06 17:34:13 by echapus          ###   ########.fr        #
+#    Updated: 2023/11/21 18:25:10 by echapus          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME	=	ircserv
 CC		=	c++
-FLAG	=	-Wall -Wextra -Werror -pedantic -std=c++98 -g3
+FLAG	=	-Wall -Wextra -Werror -std=c++98 -g3
 
 #Source
 FILES	=	main Channel Client Server utils commands

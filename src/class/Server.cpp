@@ -6,7 +6,7 @@
 /*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/06 15:25:50 by echapus          ###   ########.fr       */
+/*   Updated: 2023/11/21 18:37:11 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,10 +185,11 @@ Server::~Server() {
 	if (epollfd != -1)
 		close(epollfd);
 
-	std::map<int, Client*>::iterator	it;
-	for (it = clients.begin(); it != clients.end(); ++it) {
+	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it){
 		close(it->first);
 		delete it->second;
 	}
+	for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); ++it)
+		delete it->second;
 	clients.clear();
 }
