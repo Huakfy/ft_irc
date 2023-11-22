@@ -30,6 +30,10 @@ Channel::~Channel(void){
 std::string	Channel::getTopic(void) const { return _topic; }
 std::string	Channel::getName(void) const { return _name; }
 
+std::string	Channel::getNameList(void) const{
+	return rebuilt(_members);
+}
+
 unsigned int	Channel::getMaxUser(void) const { return _maxUser; }
 unsigned int	Channel::getCurrentUser(void) const { return _currentUser; }
 

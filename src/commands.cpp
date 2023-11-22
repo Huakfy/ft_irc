@@ -52,7 +52,7 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 			}
 			// ERR_INVITEONLYCHAN (473) channel invite mode only but user not invited
 			if (it->second->getOnlyInvite() && !it->second->isInvited(client->getNickname())){
-				log_send("473 " + client->getNickname() + " " + chans[i] + " :Cannot join channel (not invited)" + CRLF, client->getfd());
+				log_send("471" + client->getNickname() + " " + chans[i] + " :Cannot join channel (not invited)" + CRLF, client->getfd());
 				continue;
 			}
 			// ERR_BADCHANNELKEY (475) mauvais mdp
@@ -76,6 +76,8 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 		}
 
 		// https://modern.ircdocs.horse/#rplnamreply-353
+		log_send("353 " + client->getNickname() + " " + chans[i] + " :" + channels[chans[i]]->getNameList(), client->getfd());
+		log_send("366 " + client->getNickname() + " " + chans[i] + " : End of /NAMES list", client->getfd());
 		// RPL_NAMREPLY (353)
 		// RPL_ENDOFNAMES (366) comme WHOIS la merde
 	}

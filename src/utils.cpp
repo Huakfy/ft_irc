@@ -39,6 +39,7 @@ std::string	rebuilt(std::vector<std::string> args){
 	std::string	str;
 	for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); ++it)
 		str += *it + " ";
+	str.erase(str.size() - 1, 1);
 	return str;
 }
 

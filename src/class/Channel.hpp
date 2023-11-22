@@ -35,6 +35,7 @@ class Channel{
 
 		std::string	getTopic(void) const;
 		std::string	getName(void) const;
+		std::string	getNameList(void) const;
 
 		unsigned int	getMaxUser(void) const;
 		unsigned int	getCurrentUser(void) const;
