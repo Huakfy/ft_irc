@@ -38,7 +38,7 @@ bool	Channel::getOnlyInvite(void) const { return _onlyinvite; }
 
 bool	Channel::checkPass(std::string pass) const { return pass == _password; }
 
-bool	Channel::isInvated(std::string user) const { return find(_invited.begin(), _invited.end(), user) != _invited.end(); }
+bool	Channel::isInvited(std::string user) const { return find(_invited.begin(), _invited.end(), user) != _invited.end(); }
 
 void	Channel::addInvited(std::string username){ _invited.push_back(username); }
 

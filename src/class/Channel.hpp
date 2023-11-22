@@ -40,7 +40,7 @@ class Channel{
 		bool	getOnlyInvite(void) const;
 
 		bool	checkPass(std::string pass) const;
-		bool	isInvated(std::string user) const;
+		bool	isInvited(std::string user) const;
 
 		void	addInvited(std::string username);
 		void	addMember(Client &client);

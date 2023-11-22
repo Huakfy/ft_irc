@@ -49,24 +49,6 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 		// channel existe gg à toi t'as bien suivi xD
 		else{
 			// faut faire des verifs ici avec les password et tout ça tmtc
-			// ERR_CHANNELISFULL (471) channel remplie
-			if (channels[chans[i]]->getOnlyInvite() && !channels[chans[i]]->isInvated(client->getNickname())){
-				reply = "471" + client->getNickname() + " " + chans[i] + " :Cannot join channel (not invited)" + CRLF;
-				printlog(reply, SEND);
-				send(client->getfd(), reply.c_str(), reply.size(), 0);
-				continue;
-			}
-			// ERR_BADCHANNELKEY (475) mauvais mdp
-			if (channels[chans[i]]->getNeedPass()){
-				if (channels[chans[i]]->checkPass(passwords[i]))
-					channels[chans[i]]->addMember(*client);
-				else{
-					reply = "475" + client->getNickname() + " " + chans[i] + " :Cannot join channel (invalid password)" + CRLF;
-					printlog(reply, SEND);
-					send(client->getfd(), reply.c_str(), reply.size(), 0);
-				}
-				continue;
-			}
 			// ERR_INVITEONLYCHAN (473) channel invite mode only but user not invited
 			if (channels[chans[i]]->getCurrentUser() == channels[chans[i]]->getMaxUser()){
 				reply = "473" + client->getNickname() + " " + chans[i] + " :Cannot join channel (channel full)" + CRLF;
@@ -74,11 +56,25 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 				send(client->getfd(), reply.c_str(), reply.size(), 0);
 				continue;
 			}
+			// ERR_CHANNELISFULL (471) channel remplie
+			if (channels[chans[i]]->getOnlyInvite() && !channels[chans[i]]->isInvited(client->getNickname())){
+				reply = "471" + client->getNickname() + " " + chans[i] + " :Cannot join channel (not invited)" + CRLF;
+				printlog(reply, SEND);
+				send(client->getfd(), reply.c_str(), reply.size(), 0);
+				continue;
+			}
+			// ERR_BADCHANNELKEY (475) mauvais mdp
+			if (channels[chans[i]]->getNeedPass() && !channels[chans[i]]->checkPass(passwords[i])){
+				reply = "475" + client->getNickname() + " " + chans[i] + " :Cannot join channel (invalid password)" + CRLF;
+				printlog(reply, SEND);
+				send(client->getfd(), reply.c_str(), reply.size(), 0);
+				continue;
+			}
 			else{
 				channels[chans[i]]->addMember(*client);
-				reply = ":" + client->getNickname() + " JOIN " + chans[i]; 
+				reply = ":" + client->getNickname() + " JOIN " + chans[i];
 				printlog(reply, SEND);
-				send(client->getfd(), reply.c_str(), reply.size(), 0); // BRODCAST
+				send(client->getfd(), reply.c_str(), reply.size(), 0); // BROADCAST
 			}
 		}
 		// enovyer le topic si topic set (je vois pas comment lancer topic autrement)
