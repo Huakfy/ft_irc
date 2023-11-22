@@ -44,7 +44,7 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 			}
 			reply = ":" + client->getNickname() + " JOIN " + chans[i];
 			printlog(reply, SEND);
-			send(client->getfd(), reply.c_str(), reply.size(), 0);
+			send(client->getfd(), reply.c_str(), reply.size(), 0); // BRODCAST
 		}
 		// channel existe gg à toi t'as bien suivi xD
 		else{
