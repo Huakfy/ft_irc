@@ -188,6 +188,8 @@ void	Server::parse_command(std::string str, Client *client){
 			continue;
 
 		std::vector<std::string>	args = split(line);
+		if (args.empty())
+			continue;
 		std::string					cmd = args[0];
 
 		// debug_buff(args);
