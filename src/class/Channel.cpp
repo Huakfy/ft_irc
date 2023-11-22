@@ -73,10 +73,21 @@ void	Channel::removeMember(Client &client){
 	std::cout << "User " << nickname << "[" << fd << "] has been removed" << std::endl;
 }
 
-void	Channel::broadcast(std::string str){
-	int i = 0;
-	for (std::vector<int>::iterator it = _usersFd.begin(); it != _usersFd.end(); ++it) {
+void	Channel::broadcast(std::string str) {
+	for (std::vector<int>::iterator it = _usersFd.begin(); it != _usersFd.end(); ++it)
 		send(*it, str.c_str(), str.size(), 0);
-		i++;
-	}
 }
+
+bool	Channel::isOnChannel(std::string user) const {
+	return find(_members.begin(), _members.end(), user) != _members.end();
+}
+
+//bool	Channel::getT() const {return _t;}
+//bool	Channel::getK() const {return _k;}
+//bool	Channel::getO() const {return _o;}
+//bool	Channel::getL() const {return _l;}
+
+//bool	Channel::setT(bool b) {_t = b;}
+//bool	Channel::setK(bool b) {_k = b;}
+//bool	Channel::setO(bool b) {_o = b;}
+//bool	Channel::setL(bool b) {_l = b;}

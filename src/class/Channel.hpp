@@ -18,6 +18,10 @@ class Channel{
 		unsigned int				_currentUser;
 		bool						_needpass;
 		bool						_onlyinvite;
+		//bool						_t;
+		//bool						_k;
+		//bool						_o;
+		//bool						_l;
 
 		class InvalidName : public std::exception{
 			public:
@@ -48,6 +52,18 @@ class Channel{
 		void	removeMember(Client &client);
 
 		void	broadcast(std::string str);
+
+		bool	isOnChannel(std::string user) const;
+
+		//bool	getT() const;
+		//bool	getK() const;
+		//bool	getO() const;
+		//bool	getL() const;
+
+		//bool	setT(bool b);
+		//bool	setK(bool b);
+		//bool	setO(bool b);
+		//bool	setL(bool b);
 };
 
 #endif

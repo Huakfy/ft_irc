@@ -37,7 +37,8 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 				log_send("476 " + client->getNickname() + " " + chans[i] + " :Invalid channel name" + CRLF, client->getfd());
 				continue;
 			}
-			log_send(":" + client->getNickname() + " JOIN " + chans[i] + CRLF, 0);
+			reply = ":" + client->getNickname() + " JOIN " + chans[i] + CRLF;
+			log_send(reply, 0);
 			channels[chans[i]]->broadcast(reply);
 		}
 
@@ -61,7 +62,8 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 			}
 			else{
 				it->second->addMember(*client);
-				log_send(":" + client->getNickname() + " JOIN " + chans[i] + CRLF, 0);
+				reply = ":" + client->getNickname() + " JOIN " + chans[i] + CRLF;
+				log_send(reply, 0);
 				it->second->broadcast(reply);
 			}
 		}
@@ -90,21 +92,29 @@ void	Server::topic(std::vector<std::string> &args, Client *client){
 	//Not enough params
 	if (args.size() < 2) {
 		std::string error = "461 " + client->getNickname() + " TOPIC :Not Enough parameters" + CRLF;
-		printlog(error, SEND);
-		send(client->getfd(), error.c_str(), error.size(), 0);
-		return;
+		return log_send(error, client->getfd());
 	}
-	//No such channel
+	//No such channel + Not on channel + No op
 	std::map<std::string, Channel*>::iterator it;
 	for (it = channels.begin(); it != channels.end(); ++it){
-		if (args[1] == it->first)
+		if (args[1] == it->first) {
+			//Not on channel
+			if (!(it->second->isOnChannel(client->getNickname()))){
+				std::string error = "442 " + client->getNickname() + " " + args[1] + " :You're not on that channel" + CRLF;
+				return log_send(error, client->getfd());
+			}
+			//Not op
+			if (args.size() > 2 && it->second->getOnlyInvite() && !it->second->isInvited(client->getNickname())){
+				std::string error = "482 " + client->getNickname() + " " + args[1] + " :You're not channel operator" + CRLF;
+				return log_send(error, client->getfd());
+			}
 			break;
+		}
 	}
+	//No such channel
 	if (it == channels.end()) {
 		std::string error = "403 " + client->getNickname() + " " + args[1] + " :No such channel" + CRLF;
-		printlog(error, SEND);
-		send(client->getfd(), error.c_str(), error.size(), 0);
-		return;
+		return log_send(error, client->getfd());
 	}
 }
 
