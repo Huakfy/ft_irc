@@ -45,19 +45,19 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 		// channel existe gg à toi t'as bien suivi xD
 		else{
 			// faut faire des verifs ici avec les password et tout ça tmtc
-			// ERR_INVITEONLYCHAN (473) channel invite mode only but user not invited
+			// ERR_CHANNELISFULL (471) channel remplie
 			if (it->second->getCurrentUser() == it->second->getMaxUser()){
-				log_send("473" + client->getNickname() + " " + chans[i] + " :Cannot join channel (channel full)" + CRLF, client->getfd());
+				log_send("471" + client->getNickname() + " " + chans[i] + " :Cannot join channel (channel full)" + CRLF, client->getfd());
 				continue;
 			}
-			// ERR_CHANNELISFULL (471) channel remplie
+			// ERR_INVITEONLYCHAN (473) channel invite mode only but user not invited
 			if (it->second->getOnlyInvite() && !it->second->isInvited(client->getNickname())){
-				log_send("471" + client->getNickname() + " " + chans[i] + " :Cannot join channel (not invited)" + CRLF, client->getfd());
+				log_send("473 " + client->getNickname() + " " + chans[i] + " :Cannot join channel (not invited)" + CRLF, client->getfd());
 				continue;
 			}
 			// ERR_BADCHANNELKEY (475) mauvais mdp
 			if (it->second->getNeedPass() && !it->second->checkPass(passwords[i])){
-				log_send("475" + client->getNickname() + " " + chans[i] + " :Cannot join channel (invalid password)" + CRLF, client->getfd());
+				log_send("475 " + client->getNickname() + " " + chans[i] + " :Cannot join channel (invalid password)" + CRLF, client->getfd());
 				continue;
 			}
 			else{
@@ -116,6 +116,18 @@ void	Server::topic(std::vector<std::string> &args, Client *client){
 		std::string error = "403 " + client->getNickname() + " " + args[1] + " :No such channel" + CRLF;
 		return log_send(error, client->getfd());
 	}
+	//checking TOPIC
+	if (args.size() == 2) {
+		std::string topic = it->second->getTopic();
+		if (topic.empty()) {
+			std::string reply = "331 " + client->getNickname() + " " + args[1] + " :No topic is set" +CRLF;
+			return log_send(reply, client->getfd());
+		}
+		else {
+			//send RPL_TOPIC + RPL_TOPICWHOTIME
+		}
+	}
+	//changer topic + Clear topic
 }
 
 void	Server::nick(std::vector<std::string> &args, Client *client){
@@ -154,7 +166,7 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 void	Server::user(std::vector<std::string> &args, Client *client){
 	printlog("Entering USER func", LOGS);
 	if (args.size() < 5)
-		return log_send("461" + client->getNickname() + " USER :Not Enough parameters" + CRLF, client->getfd());
+		return log_send("461 " + client->getNickname() + " USER :Not Enough parameters" + CRLF, client->getfd());
 	client->setUsername(args[1]);
 	std::string realname;
 	for (unsigned int index = 4; index < args.size(); ++index)
@@ -177,7 +189,7 @@ void	Server::pass(std::vector<std::string> &args, Client *client){
 void	Server::whois(std::vector<std::string> &args, Client *client){
 	printlog("Entering WHOIS func", LOGS);
 	if (args.size() != 2)
-		return log_send("461" + client->getNickname() + " WHOIS :Not Enough parameters" + CRLF, client->getfd());
+		return log_send("461 " + client->getNickname() + " WHOIS :Not Enough parameters" + CRLF, client->getfd());
 
 	std::string reply;
 	if (args[1] == client->getNickname()){
@@ -187,7 +199,7 @@ void	Server::whois(std::vector<std::string> &args, Client *client){
 	}
 	else{
 		reply = "401 " + client->getNickname() + ":No such nick" + CRLF;
-		reply += "318" + client->getNickname() + " :End of WHOIS list" + CRLF;
+		reply += "318 " + client->getNickname() + " :End of WHOIS list" + CRLF;
 		send(client->getfd(), reply.c_str(), reply.size(), 0);
 	}
 	printlog(reply, SEND);

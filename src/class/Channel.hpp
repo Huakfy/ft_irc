@@ -19,7 +19,6 @@ class Channel{
 		bool						_needpass;
 		bool						_onlyinvite;
 		//bool						_t;
-		//bool						_k;
 		//bool						_o;
 		//bool						_l;
 
@@ -56,12 +55,10 @@ class Channel{
 		bool	isOnChannel(std::string user) const;
 
 		//bool	getT() const;
-		//bool	getK() const;
 		//bool	getO() const;
 		//bool	getL() const;
 
 		//bool	setT(bool b);
-		//bool	setK(bool b);
 		//bool	setO(bool b);
 		//bool	setL(bool b);
 };
