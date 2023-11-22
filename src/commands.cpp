@@ -84,7 +84,29 @@ void	Server::privmsg(std::vector<std::string> &args, Client *client){ std::cout 
 void	Server::invite(std::vector<std::string> &args, Client *client){ std::cout << "<invite>" << std::endl; (void)args; (void)client;}
 
 // utiliser rebuilt pour les autres params de topic tqt fait moi confiance
-void	Server::topic(std::vector<std::string> &args, Client *client){ std::cout << "<topic>" << std::endl; (void)args; (void)client;}
+void	Server::topic(std::vector<std::string> &args, Client *client){
+	printlog("Entering TOPIC func", LOGS);
+
+	//Not enough params
+	if (args.size() < 2) {
+		std::string error = "461 " + client->getNickname() + " TOPIC :Not Enough parameters" + CRLF;
+		printlog(error, SEND);
+		send(client->getfd(), error.c_str(), error.size(), 0);
+		return;
+	}
+	//No such channel
+	std::map<std::string, Channel*>::iterator it;
+	for (it = channels.begin(); it != channels.end(); ++it){
+		if (args[1] == it->first)
+			break;
+	}
+	if (it == channels.end()) {
+		std::string error = "403 " + client->getNickname() + " " + args[1] + " :No such channel" + CRLF;
+		printlog(error, SEND);
+		send(client->getfd(), error.c_str(), error.size(), 0);
+		return;
+	}
+}
 
 void	Server::nick(std::vector<std::string> &args, Client *client){
 	printlog("Entering NICK func", LOGS);
