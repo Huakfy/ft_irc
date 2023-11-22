@@ -12,12 +12,9 @@ void	Server::part(std::vector<std::string> &args, Client *client){ std::cout << 
 void	Server::join(std::vector<std::string> &args, Client *client){
 	printlog("Entering JOIN func", LOGS);
 
-	if (args.size() == 1){
-		std::string error = "461 :Not Enough parameters" + CRLF;
-		printlog(error, SEND);
-		send(client->getfd(), error.c_str(), error.size(), 0);
-		throw FunctionError();
-	}
+	if (args.size() == 1)
+		return log_send("461 :Not Enough parameters" + CRLF, client->getfd());
+
 	args.erase(args.begin());
 	// faire JOIN 0 ? (0 permet de leave tout les channels desquels tu faisais parti en envoyant la commande PART à ta place)
 	// retirer le 0 du vect si on le fait ou simplement args.erase(args.begin()) puisqu'un autre erase va être fait après quoi qu'il arrive donc 2 erase donc ce qu'on veut au final
@@ -27,7 +24,7 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 		passwords = parseArgs(args[2]);
 	while (passwords.size() != chans.size())
 		passwords.push_back("");
-	// big brain in coming
+
 	for (size_t i = 0; i < chans.size(); ++i){
 		std::map<std::string, Channel *>::iterator it = channels.find(chans[i]);
 		std::string	reply;
@@ -37,13 +34,10 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 				channels.insert(std::pair<std::string, Channel *>(chans[i], new Channel(chans[i], client->getNickname(), passwords[i], *client)));
 			}
 			catch (std::exception &e){
-				reply = "476 " + client->getNickname() + " " + chans[i] + " :Invalid channel name" + CRLF;
-				printlog(reply, SEND);
-				send(client->getfd(), reply.c_str(), reply.size(), 0);
+				log_send("476 " + client->getNickname() + " " + chans[i] + " :Invalid channel name" + CRLF, client->getfd());
 				continue;
 			}
-			reply = ":" + client->getNickname() + " JOIN " + chans[i] + CRLF;
-			printlog(reply, SEND);
+			log_send(":" + client->getNickname() + " JOIN " + chans[i] + CRLF, 0);
 			channels[chans[i]]->broadcast(reply);
 		}
 
@@ -51,31 +45,24 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 		else{
 			// faut faire des verifs ici avec les password et tout ça tmtc
 			// ERR_INVITEONLYCHAN (473) channel invite mode only but user not invited
-			if (channels[chans[i]]->getCurrentUser() == channels[chans[i]]->getMaxUser()){
-				reply = "473" + client->getNickname() + " " + chans[i] + " :Cannot join channel (channel full)" + CRLF;
-				printlog(reply, SEND);
-				send(client->getfd(), reply.c_str(), reply.size(), 0);
+			if (it->second->getCurrentUser() == it->second->getMaxUser()){
+				log_send("473" + client->getNickname() + " " + chans[i] + " :Cannot join channel (channel full)" + CRLF, client->getfd());
 				continue;
 			}
 			// ERR_CHANNELISFULL (471) channel remplie
-			if (channels[chans[i]]->getOnlyInvite() && !channels[chans[i]]->isInvited(client->getNickname())){
-				reply = "471" + client->getNickname() + " " + chans[i] + " :Cannot join channel (not invited)" + CRLF;
-				printlog(reply, SEND);
-				send(client->getfd(), reply.c_str(), reply.size(), 0);
+			if (it->second->getOnlyInvite() && !it->second->isInvited(client->getNickname())){
+				log_send("471" + client->getNickname() + " " + chans[i] + " :Cannot join channel (not invited)" + CRLF, client->getfd());
 				continue;
 			}
 			// ERR_BADCHANNELKEY (475) mauvais mdp
-			if (channels[chans[i]]->getNeedPass() && !channels[chans[i]]->checkPass(passwords[i])){
-				reply = "475" + client->getNickname() + " " + chans[i] + " :Cannot join channel (invalid password)" + CRLF;
-				printlog(reply, SEND);
-				send(client->getfd(), reply.c_str(), reply.size(), 0);
+			if (it->second->getNeedPass() && !it->second->checkPass(passwords[i])){
+				log_send("475" + client->getNickname() + " " + chans[i] + " :Cannot join channel (invalid password)" + CRLF, client->getfd());
 				continue;
 			}
 			else{
-				channels[chans[i]]->addMember(*client);
-				reply = ":" + client->getNickname() + " JOIN " + chans[i] + CRLF;
-				printlog(reply, SEND);
-				channels[chans[i]]->broadcast(reply);
+				it->second->addMember(*client);
+				log_send(":" + client->getNickname() + " JOIN " + chans[i] + CRLF, 0);
+				it->second->broadcast(reply);
 			}
 		}
 		// enovyer le topic si topic set (je vois pas comment lancer topic autrement)
@@ -106,25 +93,22 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 		if (args.size() == 1)
 			error = "431 :No nickname given" + CRLF;
 		else
-			error = "432 :Erroneus  nickname" + CRLF;
-		printlog(error, SEND);
-		send(client->getfd(), error.c_str(), error.size(), 0);
+			error = "432 :Erroneus nickname" + CRLF;
+		log_send(error, client->getfd());
 		throw FunctionError();
 	}
 
 	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it){
 		if (it->second->getNickname() == args[1]){
 			error = "433 :Nickname alredy in use" + CRLF;
-			printlog(error, SEND);
-			send(client->getfd(), error.c_str(), error.size(), 0);
+			log_send(error, client->getfd());
 			throw FunctionError();
 		}
 	}
 
 	if (client->getNickname().empty()){
 		std::string welcome = 	"001 " + args[1] + " :Welcome to our Server. A echapus & mjourno network !" + CRLF; // on grade l'espace avant les ':' mais pas celui après pour que ça soit plus propre
-		printlog(welcome, SEND);
-		send(client->getfd(), welcome.c_str(), welcome.size(), 0);
+		log_send(welcome, client->getfd());
 	}
 	else{
 		std::string reply = "!" +  client->getNickname() + " NICK " + args[1] + CRLF;
@@ -137,12 +121,8 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 
 void	Server::user(std::vector<std::string> &args, Client *client){
 	printlog("Entering USER func", LOGS);
-	if (args.size() < 5){
-		std::string error = "461 :Not Enough parameters" + CRLF;
-		printlog(error, SEND);
-		send(client->getfd(), error.c_str(), error.size(), 0);
-		throw FunctionError();
-	}
+	if (args.size() < 5)
+		return log_send("461" + client->getNickname() + " USER :Not Enough parameters" + CRLF, client->getfd());
 	client->setUsername(args[1]);
 	std::string realname;
 	for (unsigned int index = 4; index < args.size(); ++index)
@@ -164,12 +144,9 @@ void	Server::pass(std::vector<std::string> &args, Client *client){
 
 void	Server::whois(std::vector<std::string> &args, Client *client){
 	printlog("Entering WHOIS func", LOGS);
-	if (args.size() != 2){
-		std::string error = "461 :Not enough parameters" + CRLF;
-		printlog(error, SEND);
-		send(client->getfd(), error.c_str(), error.size(), 0);
-		throw FunctionError();
-	}
+	if (args.size() != 2)
+		return log_send("461" + client->getNickname() + " WHOIS :Not Enough parameters" + CRLF, client->getfd());
+
 	std::string reply;
 	if (args[1] == client->getNickname()){
 		reply = "311 " + client->getNickname() + " " + client->getUsername() + " * :" + client->getRealname() + CRLF;
@@ -187,9 +164,7 @@ void	Server::whois(std::vector<std::string> &args, Client *client){
 void	Server::pong(std::vector<std::string> &args, Client *client){
 	args.clear();
 	printlog("Entering PONG func", LOGS);
-	std::string reply = "PONG " + client->getNickname() + CRLF;
-	printlog(reply, SEND);
-	send(client->getfd(), reply.c_str(), reply.size(), 0);
+	log_send("PONG " + client->getNickname() + CRLF, client->getfd());
 }
 
 void	debug_buff(std::vector<std::string> buff){
@@ -240,8 +215,7 @@ void	Server::parse_command(std::string str, Client *client){
 					error = "464 " + client->getNickname() + " :Incorrect password" + CRLF;
 				else
 					error = "451 " + client->getNickname() + " :You have not been registered" + CRLF;
-				printlog(error, SEND);
-				send(client->getfd(), error.c_str(), error.size(), 0);
+				log_send(error, client->getfd());
 				DeleteClient(client->getfd());
 			}
 		}

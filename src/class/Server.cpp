@@ -123,6 +123,12 @@ void	Server::DeleteClient(int user_fd){
 	std::cout << "\033[0;91m<Server LOGS>\033[0;39m client with fd " << user_fd << " has been erased" << std::endl;
 }
 
+void	Server::log_send(std::string str, int fd){
+	printlog(str, SEND);
+	if (fd)
+		send(fd, str.c_str(), str.size(), 0);
+}
+
 bool	Server::FillBuffer(int user_fd){
 	_buffer.clear();
 	char	buffer[512];
