@@ -32,13 +32,15 @@ class Channel{
 
 		std::string	getTopic(void) const;
 		std::string	getName(void) const;
-		std::string	getPass(void) const;
 
 		unsigned int	getMaxUser(void) const;
 		unsigned int	getCurrentUser(void) const;
 
 		bool	getNeedPass(void) const;
 		bool	getOnlyInvite(void) const;
+
+		bool	checkPass(std::string pass) const;
+		bool	isInvated(std::string user) const;
 
 		void	addInvited(std::string username);
 		void	addMember(Client &client);

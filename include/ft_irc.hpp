@@ -41,6 +41,7 @@
 
 # include <vector>
 # include <map>
+# include <algorithm>
 
 # define CRLF std::string("\r\n")
 

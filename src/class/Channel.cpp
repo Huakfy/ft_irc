@@ -29,13 +29,16 @@ Channel::~Channel(void){
 
 std::string	Channel::getTopic(void) const { return _topic; }
 std::string	Channel::getName(void) const { return _name; }
-std::string	Channel::getPass(void) const { return _password; }
 
 unsigned int	Channel::getMaxUser(void) const { return _maxUser; }
 unsigned int	Channel::getCurrentUser(void) const { return _currentUser; }
 
 bool	Channel::getNeedPass(void) const { return _needpass; }
 bool	Channel::getOnlyInvite(void) const { return _onlyinvite; }
+
+bool	Channel::checkPass(std::string pass) const { return pass == _password; }
+
+bool	Channel::isInvated(std::string user) const { return find(_invited.begin(), _invited.end(), user) != _invited.end(); }
 
 void	Channel::addInvited(std::string username){ _invited.push_back(username); }
 
