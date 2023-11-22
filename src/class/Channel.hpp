@@ -46,6 +46,8 @@ class Channel{
 		void	addMember(Client &client);
 
 		void	removeMember(Client &client);
+
+		void	broadcast(std::string str);
 };
 
 #endif

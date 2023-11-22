@@ -42,10 +42,11 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 				send(client->getfd(), reply.c_str(), reply.size(), 0);
 				continue;
 			}
-			reply = ":" + client->getNickname() + " JOIN " + chans[i];
+			reply = ":" + client->getNickname() + " JOIN " + chans[i] + CRLF;
 			printlog(reply, SEND);
-			send(client->getfd(), reply.c_str(), reply.size(), 0); // BRODCAST
+			channels[chans[i]]->broadcast(reply);
 		}
+
 		// channel existe gg à toi t'as bien suivi xD
 		else{
 			// faut faire des verifs ici avec les password et tout ça tmtc
@@ -72,9 +73,9 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 			}
 			else{
 				channels[chans[i]]->addMember(*client);
-				reply = ":" + client->getNickname() + " JOIN " + chans[i];
+				reply = ":" + client->getNickname() + " JOIN " + chans[i] + CRLF;
 				printlog(reply, SEND);
-				send(client->getfd(), reply.c_str(), reply.size(), 0); // BROADCAST
+				channels[chans[i]]->broadcast(reply);
 			}
 		}
 		// enovyer le topic si topic set (je vois pas comment lancer topic autrement)
@@ -84,6 +85,7 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 			top.push_back(chans[i]);
 			topic(top, client);
 		}
+
 		// https://modern.ircdocs.horse/#rplnamreply-353
 		// RPL_NAMREPLY (353)
 		// RPL_ENDOFNAMES (366) comme WHOIS la merde
@@ -125,7 +127,7 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 		send(client->getfd(), welcome.c_str(), welcome.size(), 0);
 	}
 	else{
-		std::string reply = "!" +  client->getNickname() + " NICK " + args[1];
+		std::string reply = "!" +  client->getNickname() + " NICK " + args[1] + CRLF;
 		printlog(reply, LOGS);
 		send(client->getfd(), reply.c_str(), reply.size(), 0); // il faudrait envoyer à tout les user qui connaissent le boug qui vient de se reNick
 	}

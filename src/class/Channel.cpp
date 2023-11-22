@@ -72,3 +72,11 @@ void	Channel::removeMember(Client &client){
 	}
 	std::cout << "User " << nickname << "[" << fd << "] has been removed" << std::endl;
 }
+
+void	Channel::broadcast(std::string str){
+	int i = 0;
+	for (std::vector<int>::iterator it = _usersFd.begin(); it != _usersFd.end(); ++it) {
+		send(*it, str.c_str(), str.size(), 0);
+		i++;
+	}
+}
