@@ -19,6 +19,13 @@ class Channel{
 		bool						_needpass;
 		bool						_onlyinvite;
 
+		class InvalidName : public std::exception{
+			public:
+				virtual const char * what() const throw(){
+					return ("Invalid Name");
+				}
+		};
+
 	public:
 		Channel(std::string name, std::string username, std::string pass, Client &client);
 		~Channel();

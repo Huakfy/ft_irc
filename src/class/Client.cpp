@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:45:23 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/04 11:25:59 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/22 14:23:02 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ sockaddr_in Client::getAddr() const {
 bool	Client::checkNickname(std::string nickname) {
 	unsigned int	index = 0;
 	std::string		must_not = " .,*?!@";
-	
+
 	if (nickname.empty() || nickname[index] == '$' || nickname[index] == ':' || nickname[index] == '#')
 		return false;
 	while (nickname[++index]){

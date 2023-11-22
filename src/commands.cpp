@@ -33,9 +33,17 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 		std::string	reply;
 		// channel existe pas
 		if (it == channels.end()){
-			channels.insert(std::pair<std::string, Channel *>(chans[i], new Channel(chans[i], client->getNickname(), passwords[i], *client)));
+			try{
+				channels.insert(std::pair<std::string, Channel *>(chans[i], new Channel(chans[i], client->getNickname(), passwords[i], *client)));
+			}
+			catch (std::exception &e){
+				reply = "476 " + client->getNickname() + " " + chans[i] + " :Invalid channel name" + CRLF;
+				printlog(reply, SEND);
+				send(client->getfd(), reply.c_str(), reply.size(), 0);
+				continue;
+			}
 			reply = ":" + client->getNickname() + " JOIN " + chans[i];
-			printlog(reply, LOGS);
+			printlog(reply, SEND);
 			send(client->getfd(), reply.c_str(), reply.size(), 0);
 		}
 		// channel existe gg à toi t'as bien suivi xD
@@ -103,7 +111,7 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 
 void	Server::user(std::vector<std::string> &args, Client *client){
 	printlog("Entering USER func", LOGS);
-	if (args.size() <= 5){
+	if (args.size() < 5){
 		std::string error = "461 :Not Enough parameters" + CRLF;
 		printlog(error, SEND);
 		send(client->getfd(), error.c_str(), error.size(), 0);
