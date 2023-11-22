@@ -115,7 +115,7 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it){
 		if (it->second->getNickname() == args[1]){
 			error = "433 :Nickname alredy in use" + CRLF;
-			printlog(error, LOGS);
+			printlog(error, SEND);
 			send(client->getfd(), error.c_str(), error.size(), 0);
 			throw FunctionError();
 		}
@@ -239,7 +239,7 @@ void	Server::parse_command(std::string str, Client *client){
 				if (!client->getAuth() && cmd == "NICK")
 					error = "464 " + client->getNickname() + " :Incorrect password" + CRLF;
 				else
-					error = "451 " + client->getNickname() + " :You have not registered" + CRLF;
+					error = "451 " + client->getNickname() + " :You have not been registered" + CRLF;
 				printlog(error, SEND);
 				send(client->getfd(), error.c_str(), error.size(), 0);
 				DeleteClient(client->getfd());
