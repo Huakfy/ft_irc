@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:28:02 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/06 17:31:37 by echapus          ###   ########.fr       */
+/*   Updated: 2023/11/23 15:37:24 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ std::vector<std::string>	split(std::string str){
 	std::vector<std::string>	spl;
 	std::istringstream			iss(str);
 	std::string					word;
-	
+
 	while (iss >> word)
 		spl.push_back(word);
 	return spl;
@@ -51,4 +51,27 @@ std::vector<std::string>	parseArgs(std::string msg){
 	while(std::getline(iss, word, ','))
 		args.push_back(word);
 	return (args);
+}
+
+void	log_send(std::string str, int fd){
+	printlog(str, SEND);
+	if (fd)
+		send(fd, str.c_str(), str.size(), 0);
+}
+
+/*
+	mode : RECV after recv func, SEND before send func, LOGS for other
+*/
+void	printlog(std::string msg, int mode){
+	std::string server;
+	if (mode == RECV)
+		server = "\033[0;92m<Server RECV>"; // GREEN
+	else if (mode == SEND)
+		server = "\033[0;94m<Server SEND>"; // BLUE
+	else
+		server = "\033[0;91m<SERVER LOGS>"; // RED
+
+	std::cout << server << "\033[0;39m " << msg; // RESET color
+	if (msg.find('\n') == std::string::npos)
+		std::cout << std::endl;
 }

@@ -13,6 +13,8 @@ class Channel{
 		std::vector<int>			_usersFd;
 		std::string					_name;
 		std::string					_topic;
+		std::string					_topicWho;
+		struct timeval				_topicTime;
 		std::string					_password;
 		unsigned int				_maxUser;
 		unsigned int				_currentUser;
@@ -34,6 +36,8 @@ class Channel{
 		~Channel();
 
 		std::string	getTopic(void) const;
+		std::string	getTopicWho(void) const;
+		timeval		getTopicTime(void) const;
 		std::string	getName(void) const;
 		std::string	getNameList(void) const;
 
@@ -54,6 +58,8 @@ class Channel{
 		void	broadcast(std::string str);
 
 		bool	isOnChannel(std::string user) const;
+
+		void	setTopic(std::string topic, Client &client);
 
 		//bool	getT() const;
 		//bool	getO() const;

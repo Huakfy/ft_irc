@@ -5,6 +5,8 @@ Channel::Channel(std::string name, std::string username, std::string pass, Clien
 		throw (Channel::InvalidName());
 	_name = name;
 	_topic = "";
+	_topicWho = "";
+	_topicTime = timeval();
 	_password = pass;
 	_needpass = false;
 	if (pass != "")
@@ -28,6 +30,11 @@ Channel::~Channel(void){
 }
 
 std::string	Channel::getTopic(void) const { return _topic; }
+
+std::string	Channel::getTopicWho(void) const { return _topicWho; }
+
+timeval	Channel::getTopicTime(void) const { return _topicTime; };
+
 std::string	Channel::getName(void) const { return _name; }
 
 std::string	Channel::getNameList(void) const{
@@ -83,12 +90,28 @@ void	Channel::removeMember(Client &client){
 }
 
 void	Channel::broadcast(std::string str) {
-	for (std::vector<int>::iterator it = _usersFd.begin(); it != _usersFd.end(); ++it)
+	for (std::vector<int>::iterator it = _usersFd.begin(); it != _usersFd.end(); ++it) {
+		std::cout << *it << " " << str.c_str() << std::endl;
 		send(*it, str.c_str(), str.size(), 0);
+	}
 }
 
 bool	Channel::isOnChannel(std::string user) const {
 	return find(_members.begin(), _members.end(), user) != _members.end();
+}
+
+void	Channel::setTopic(std::string topic, Client &client) {
+	_topic = topic;
+	_topicWho = client.getNickname();
+	gettimeofday(&_topicTime, NULL);
+
+	std::string reply;
+	reply = ":" + _topicWho + "!@ " + "TOPIC "  + _name + " :";
+	if (!(topic.empty()))
+		reply += topic;
+	reply += CRLF;
+	log_send(reply, 0);
+	broadcast(reply);
 }
 
 //bool	Channel::getT() const {return _t;}

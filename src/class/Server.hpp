@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/21 18:25:19 by echapus          ###   ########.fr       */
+/*   Updated: 2023/11/23 15:06:32 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,12 +41,11 @@ class Server {
 
 		void	PrintFunctionError(std::string file, int line, std::string error, int err);
 		int		NewClient(void);
-		void	printlog(std::string msg, int mode);
-		void	log_send(std::string str, int fd);
+
 		void	DeleteClient(int user_fd);
 		bool	FillBuffer(int user_fd);
 		void	ExistingClient(int user_fd);
-		
+
 		typedef void (Server::*Command)(std::vector<std::string> &buffer, Client *client);
 		void	mode(std::vector<std::string> &buffer, Client *client);
 		void	kick(std::vector<std::string> &buffer, Client *client);

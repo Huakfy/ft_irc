@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/21 18:37:11 by echapus          ###   ########.fr       */
+/*   Updated: 2023/11/23 17:37:07 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,36 +99,12 @@ int		Server::NewClient(void) {
 
 	return tmpfd;
 }
-/*
-	mode : RECV after recv func, SEND before send func, LOGS for other
-*/
-void	Server::printlog(std::string msg, int mode){
-	std::string server;
-	if (mode == RECV)
-		server = "\033[0;92m<Server REVC>"; // GREEN
-	else if (mode == SEND)
-		server = "\033[0;94m<Server SEND>"; // BLUE
-	else
-		server = "\033[0;91m<SERVER LOGS>"; // RED
-
-	std::cout << server << "\033[0;39m " << msg; // RESET color
-	if (msg.find('\n') == std::string::npos)
-		std::cout << std::endl;
-}
 
 void	Server::DeleteClient(int user_fd){
 	close(user_fd);
 	delete clients[user_fd];
 	clients.erase(user_fd);
 	std::cout << "\033[0;91m<Server LOGS>\033[0;39m client with fd " << user_fd << " has been erased" << std::endl;
-}
-
-void	Server::log_send(std::string str, int fd){
-	if (str.rfind(CRLF) == std::string::npos)
-		str += CRLF;
-	printlog(str, SEND);
-	if (fd)
-		send(fd, str.c_str(), str.size(), 0);
 }
 
 bool	Server::FillBuffer(int user_fd){

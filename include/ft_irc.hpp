@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_irc.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 15:18:24 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/21 18:25:28 by echapus          ###   ########.fr       */
+/*   Updated: 2023/11/23 15:06:40 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,8 @@
 # include <map>
 # include <algorithm>
 
+# include <sys/time.h>
+
 # define CRLF std::string("\r\n")
 
 # define RECV 0
@@ -62,5 +64,8 @@ std::string	rebuilt(std::vector<std::string> args);
 
 std::vector<std::string>	split(std::string str);
 std::vector<std::string>	parseArgs(std::string msg);
+
+void	log_send(std::string str, int fd);
+void	printlog(std::string msg, int mode);
 
 #endif
