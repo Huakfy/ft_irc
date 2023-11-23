@@ -190,19 +190,20 @@ void	Server::topic(std::vector<std::string> &args, Client *client){
 
 void	Server::nick(std::vector<std::string> &args, Client *client){
 	printlog("Entering NICK func", LOGS);
+	std::cout << args[1000] << std::endl;
 	std::string error;
 	if (args.size() == 1 || !client->checkNickname(args[1])){
 		if (args.size() == 1)
-			error = "431 :No nickname given" + CRLF;
+			error = "431 : No nickname given" + CRLF;
 		else
-			error = "432 :Erroneus nickname" + CRLF;
+			error = "432 : Erroneus nickname" + CRLF;
 		log_send(error, client->getfd());
 		throw FunctionError();
 	}
 
 	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it){
 		if (it->second->getNickname() == args[1]){
-			error = "433 :Nickname alredy in use" + CRLF;
+			error = "433 : Nickname alredy in use" + CRLF;
 			log_send(error, client->getfd());
 			throw FunctionError();
 		}
