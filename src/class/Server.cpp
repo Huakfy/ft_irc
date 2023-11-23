@@ -124,6 +124,8 @@ void	Server::DeleteClient(int user_fd){
 }
 
 void	Server::log_send(std::string str, int fd){
+	if (str.rfind(CRLF) == std::string::npos)
+		str += CRLF;
 	printlog(str, SEND);
 	if (fd)
 		send(fd, str.c_str(), str.size(), 0);

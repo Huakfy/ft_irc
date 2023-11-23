@@ -23,7 +23,7 @@ Channel::~Channel(void){
 	_op.clear();
 	_invited.clear();
 	_usersFd.clear();
-	std::cout << "Channel \"" << _name << "\" has been deleted." << std::cout;
+	// std::cout << "Channel \"" << _name << "\" has been deleted." << std::cout;
 	return ;
 }
 
@@ -31,7 +31,11 @@ std::string	Channel::getTopic(void) const { return _topic; }
 std::string	Channel::getName(void) const { return _name; }
 
 std::string	Channel::getNameList(void) const{
-	return rebuilt(_members);
+	std::string	str;
+
+	for (std::vector<std::string>::const_iterator it = _members.begin(); it != _members.end(); ++it)
+		str += "@" + *it + " ";
+	return str;
 }
 
 unsigned int	Channel::getMaxUser(void) const { return _maxUser; }
@@ -74,6 +78,7 @@ void	Channel::removeMember(Client &client){
 			break ;
 		}
 	}
+	_currentUser--;
 	std::cout << "User " << nickname << "[" << fd << "] has been removed" << std::endl;
 }
 

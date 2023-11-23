@@ -7,7 +7,46 @@ void	Server::mode(std::vector<std::string> &args, Client *client){ std::cout << 
 
 void	Server::kick(std::vector<std::string> &args, Client *client){ std::cout << "<kick>" << std::endl; (void)args; (void)client;}
 
-void	Server::part(std::vector<std::string> &args, Client *client){ std::cout << "<part>" << std::endl; (void)args; (void)client;}
+void	Server::part(std::vector<std::string> &args, Client *client){
+	printlog("Entering PART func", LOGS);
+
+	if (args.size() < 2)
+		return log_send("461 " + client->getNickname() + " TOPIC :Not Enough parameters" + CRLF, client->getfd());
+
+	args.erase(args.begin());
+	std::vector<std::string>	partargs = parseArgs(args[0]);
+	std::vector<std::string>	reasons;
+	if (args.size() >= 2)
+		reasons = parseArgs(args[1]);
+	while (reasons.size() != partargs.size())
+		reasons.push_back("");
+	//No such channel + Not on channel
+	for (std::vector<std::string>::iterator it = partargs.begin(); it != partargs.end(); ++it){
+		std::map<std::string, Channel*>::iterator chan_it = channels.find(*it);
+		if (chan_it == channels.end()){
+			log_send("403 " + client->getNickname() + " " + args[1] + " :No such channel" + CRLF, client->getfd());
+			continue;
+		}
+		else{
+			if (!chan_it->second->isOnChannel(client->getNickname())){
+				log_send("442 " + client->getNickname() + " " + args[1] + " :You're not on that channel" + CRLF, client->getfd());
+				continue;
+			}
+			else{
+				std::string reply = ":" + client->getNickname() + "!@ PART " + chan_it->second->getName() + CRLF;
+				chan_it->second->broadcast(reply);
+				log_send(reply, 0);
+				chan_it->second->removeMember(*client);
+			}
+		}
+		// empty channel == delete channel
+		if (!chan_it->second->getCurrentUser()){
+			printlog("channel " + chan_it->second->getName() + " has been deleted", LOGS);
+			delete chan_it->second;
+			channels.erase(chan_it);
+		}
+	}
+}
 
 void	Server::join(std::vector<std::string> &args, Client *client){
 	printlog("Entering JOIN func", LOGS);
@@ -76,8 +115,8 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 		}
 
 		// https://modern.ircdocs.horse/#rplnamreply-353
-		log_send("353 " + client->getNickname() + " " + chans[i] + " :" + channels[chans[i]]->getNameList(), client->getfd());
-		log_send("366 " + client->getNickname() + " " + chans[i] + " : End of /NAMES list", client->getfd());
+		log_send("353 " + client->getNickname() + " = " + chans[i] + " :" + channels[chans[i]]->getNameList() + CRLF, client->getfd());
+		log_send("366 " + client->getNickname() + " " + chans[i] + " : End of /NAMES list" + CRLF, client->getfd());
 		// RPL_NAMREPLY (353)
 		// RPL_ENDOFNAMES (366) comme WHOIS la merde
 	}
