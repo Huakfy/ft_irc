@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:28:02 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/23 15:37:24 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/23 17:43:45 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,8 @@ std::vector<std::string>	parseArgs(std::string msg){
 }
 
 void	log_send(std::string str, int fd){
+	if (str.rfind(CRLF) == std::string::npos)
+		str += CRLF;
 	printlog(str, SEND);
 	if (fd)
 		send(fd, str.c_str(), str.size(), 0);
