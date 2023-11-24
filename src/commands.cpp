@@ -180,17 +180,6 @@ void	Server::privmsg(std::vector<std::string> &args, Client *client){
 
 void	Server::invite(std::vector<std::string> &args, Client *client){
 	printlog("Entering INVITE func", LOGS);
-	//No args
-	//if (args.size() == 1){
-	//	for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); ++it){
-	//		if (it->second->isInvited(client->getNickname())) {
-	//			std::string	reply = "336 " + client->getNickname() + " " + it->first + CRLF;
-	//			log_send(reply, client->getfd());
-	//		}
-	//	}
-	//	std::string	reply = "337 " + client->getNickname() + " :End of /INVITE list" + CRLF;
-	//	log_send(reply, client->getfd());
-	//}
 	if (args.size() < 3)
 		return log_send("461 " + client->getNickname() + " INVITE :Not enough parameters" + CRLF, client->getfd());
 	if (channels.find(args[2]) == channels.end())
@@ -295,9 +284,11 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 		log_send(welcome, client->getfd());
 	}
 	else{
-		std::string reply = "!" +  client->getNickname() + " NICK " + args[1] + CRLF;
+		std::string reply = ":" +  client->getNickname() + " NICK " + args[1] + CRLF;
 		printlog(reply, LOGS);
-		send(client->getfd(), reply.c_str(), reply.size(), 0); // il faudrait envoyer à tout les user qui connaissent le boug qui vient de se reNick
+		for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); it++)
+			//send(client->getfd(), reply.c_str(), reply.size(), 0); // il faudrait envoyer à tout les user qui connaissent le boug qui vient de se reNick
+			send(it->first, reply.c_str(), reply.size(), 0); // il faudrait envoyer à tout les user qui connaissent le boug qui vient de se reNick
 	}
 	client->setNickname(args[1]);
 	client->setRegister();
