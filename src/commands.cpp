@@ -338,7 +338,6 @@ void	Server::whois(std::vector<std::string> &args, Client *client){
 
 void	Server::pong(std::vector<std::string> &args, Client *client){
 	printlog("Entering PONG func", LOGS);
-	//log_send("PONG " + client->getNickname() + CRLF, client->getfd());
 	args.erase(args.begin());
 	std::string reply = rebuilt(args);
 	log_send("PONG " + reply + CRLF, client->getfd());
