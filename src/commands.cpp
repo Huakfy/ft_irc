@@ -73,10 +73,10 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 	args.erase(args.begin());
 	// faire JOIN 0 ? (0 permet de leave tout les channels desquels tu faisais parti en envoyant la commande PART à ta place)
 	// retirer le 0 du vect si on le fait ou simplement args.erase(args.begin()) puisqu'un autre erase va être fait après quoi qu'il arrive donc 2 erase donc ce qu'on veut au final
-	std::vector<std::string>	chans = parseArgs(args[1]);
+	std::vector<std::string>	chans = parseArgs(args[0]);
 	std::vector<std::string>	passwords;
 	if (args.size() == 2) // pour que cette ligne fonctionne
-		passwords = parseArgs(args[2]);
+		passwords = parseArgs(args[1]);
 	while (passwords.size() != chans.size())
 		passwords.push_back("");
 
