@@ -55,6 +55,7 @@ class Server {
 		void	join(std::vector<std::string> &buffer, Client *client);
 		void	user(std::vector<std::string> &buffer, Client *client);
 		void	pass(std::vector<std::string> &buffer, Client *client);
+		void	quit(std::vector<std::string> &buffer, Client *client);
 		void	privmsg(std::vector<std::string> &buffer, Client *client);
 		void	invite(std::vector<std::string> &buffer, Client *client);
 		void	topic(std::vector<std::string> &buffer, Client *client);

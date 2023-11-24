@@ -33,7 +33,7 @@ void	Server::part(std::vector<std::string> &args, Client *client){
 				continue;
 			}
 			else{
-				std::string reply = ":" + client->getNickname() + "!@ PART " + chan_it->second->getName() + CRLF;
+				std::string reply = ":" + client->getNickname() + "! PART " + chan_it->second->getName() + CRLF;
 				chan_it->second->broadcast(reply);
 				log_send(reply, 0);
 				chan_it->second->removeMember(*client);
@@ -117,7 +117,7 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 			}
 			else{
 				it->second->addMember(*client);
-				reply = ":" + client->getNickname() + " JOIN " + chans[i] + CRLF;
+				reply = ":" + client->getNickname() + "! JOIN " + chans[i] + CRLF;
 				log_send(reply, 0);
 				it->second->broadcast(reply);
 			}
@@ -136,6 +136,13 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 		// RPL_NAMREPLY (353)
 		// RPL_ENDOFNAMES (366) comme WHOIS la merde
 	}
+}
+
+void	Server::quit(std::vector<std::string> &args, Client *client){
+	printlog("Entering QUIT func", LOGS);
+
+	(void)args;
+	(void)client;
 }
 
 void	Server::privmsg(std::vector<std::string> &args, Client *client){
@@ -158,7 +165,7 @@ void	Server::privmsg(std::vector<std::string> &args, Client *client){
 				log_send("404 " + client->getNickname() + " " + *target + " :Cannot send to channel" + CRLF, client->getfd());
 				continue;
 			}
-			channels[*target]->broadcastChannel(":" + client->getNickname() + " PRIVMSG " + *target + " : " + msg + CRLF, client->getfd());
+			channels[*target]->broadcastChannel(":" + client->getNickname() + " PRIVMSG " + *target + " :" + msg + CRLF, client->getfd());
 		}
 		// send to user
 		else{
@@ -167,14 +174,13 @@ void	Server::privmsg(std::vector<std::string> &args, Client *client){
 				log_send("401 " + client->getNickname() + " :No such nick" + CRLF, client->getfd());
 				continue;
 			}
-			log_send(":" + client->getNickname() + " PRIVMSG " + user->getNickname() + " : " + msg + CRLF, user->getfd());
+			log_send(":" + client->getNickname() + " PRIVMSG " + user->getNickname() + " :" + msg + CRLF, user->getfd());
 		}
 	}
 }
 
 void	Server::invite(std::vector<std::string> &args, Client *client){ std::cout << "<invite>" << std::endl; (void)args; (void)client;}
 
-// utiliser rebuilt pour les autres params de topic tqt fait moi confiance
 void	Server::topic(std::vector<std::string> &args, Client *client){
 	printlog("Entering TOPIC func", LOGS);
 
@@ -339,6 +345,7 @@ void	Server::parse_command(std::string str, Client *client){
 	cmdMap["PASS"]		= &Server::pass;
 	cmdMap["NICK"]		= &Server::nick;
 	cmdMap["PING"]		= &Server::pong;
+	cmdMap["QUIT"]		= &Server::quit;
 	cmdMap["TOPIC"]		= &Server::topic;
 	cmdMap["WHOIS"]		= &Server::whois;
 	cmdMap["INVITE"]	= &Server::invite;
