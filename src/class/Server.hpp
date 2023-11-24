@@ -46,6 +46,8 @@ class Server {
 		bool	FillBuffer(int user_fd);
 		void	ExistingClient(int user_fd);
 
+		Client	*getClientByNickname(std::string nick);
+
 		typedef void (Server::*Command)(std::vector<std::string> &buffer, Client *client);
 		void	mode(std::vector<std::string> &buffer, Client *client);
 		void	kick(std::vector<std::string> &buffer, Client *client);

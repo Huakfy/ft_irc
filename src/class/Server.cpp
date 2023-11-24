@@ -139,6 +139,13 @@ void	Server::ExistingClient(int user_fd) {
 	message.clear();
 }
 
+Client	*Server::getClientByNickname(std::string nick){
+	for (std::map<int, Client *>::iterator it = clients.begin(); it != clients.end(); ++it){
+		if (it->second->getNickname() == nick)
+			return (it->second);
+	}
+	return NULL;
+}
 
 void	Server::Launch() {
 	while (1) {
