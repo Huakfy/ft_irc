@@ -20,7 +20,7 @@ class Channel{
 		unsigned int				_currentUser;
 		bool						_needpass;
 		bool						_onlyinvite;
-		//bool						_t;
+		bool						_t;
 		//bool						_o;
 		//bool						_l;
 
@@ -63,11 +63,11 @@ class Channel{
 
 		void	setTopic(std::string topic, Client &client);
 
-		//bool	getT() const;
+		bool	getT() const;
 		//bool	getO() const;
 		//bool	getL() const;
 
-		//bool	setT(bool b);
+		void	setT(bool b);
 		//bool	setO(bool b);
 		//bool	setL(bool b);
 };

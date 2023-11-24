@@ -216,7 +216,7 @@ void	Server::topic(std::vector<std::string> &args, Client *client){
 				return log_send(error, client->getfd());
 			}
 			//Not op
-			if (args.size() > 2 && it->second->getOnlyInvite() && !it->second->isInvited(client->getNickname())){
+			if (args.size() > 2 && it->second->getT() && !it->second->isOp(client->getNickname())){
 				std::string error = "482 " + client->getNickname() + " " + args[1] + " :You're not channel operator" + CRLF;
 				return log_send(error, client->getfd());
 			}

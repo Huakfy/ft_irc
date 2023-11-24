@@ -17,6 +17,7 @@ Channel::Channel(std::string name, std::string username, std::string pass, Clien
 	_onlyinvite = false;
 	_currentUser = 1;
 	_maxUser = 10;
+	_t = 0; //if 0 everyone can change topic, if one user has to be operator
 	return ;
 }
 
@@ -134,12 +135,12 @@ void	Channel::setTopic(std::string topic, Client &client) {
 	broadcast(reply);
 }
 
-//bool	Channel::getT() const {return _t;}
+bool	Channel::getT() const {return _t;}
 //bool	Channel::getK() const {return _k;}
 //bool	Channel::getO() const {return _o;}
 //bool	Channel::getL() const {return _l;}
 
-//bool	Channel::setT(bool b) {_t = b;}
+void	Channel::setT(bool b) {_t = b;}
 //bool	Channel::setK(bool b) {_k = b;}
 //bool	Channel::setO(bool b) {_o = b;}
 //bool	Channel::setL(bool b) {_l = b;}
