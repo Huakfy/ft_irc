@@ -55,13 +55,17 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 		return log_send("461 :Not Enough parameters" + CRLF, client->getfd());
 
 	if (args[1] == "0"){
-		for (std::map<std::string, Channel *>::iterator it = channels.begin(); it != channels.end(); ++it){
+		std::map<std::string, Channel *>::iterator it = channels.begin();
+		while (it != channels.end()){
 			if (it->second->isOnChannel(client->getNickname())){
 				std::vector<std::string> tmp;
 				tmp.push_back("PART");
 				tmp.push_back(it->second->getName());
 				part(tmp, client);
+				it = channels.begin();
+				continue;
 			}
+			it++;
 		}
 		args.erase(args.begin());
 	}
