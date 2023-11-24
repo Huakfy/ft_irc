@@ -56,6 +56,7 @@ class Channel{
 		void	removeMember(Client &client);
 
 		void	broadcast(std::string str);
+		void	broadcastChannel(std::string str, int fd);
 
 		bool	isOnChannel(std::string user) const;
 

@@ -138,7 +138,39 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 	}
 }
 
-void	Server::privmsg(std::vector<std::string> &args, Client *client){ std::cout << "<privmsg>" << std::endl; (void)args; (void)client;}
+void	Server::privmsg(std::vector<std::string> &args, Client *client){
+	printlog("Entering PRIVMSG func", LOGS);
+
+	if (args.size() == 1)
+		return log_send("411 " + client->getNickname() + " :No recipient given (PRIVMSG)" + CRLF, client->getfd());
+	if (args.size() == 2)
+		return log_send("412 " + client->getNickname() + " :No text to send" + CRLF, client->getfd());
+
+	args.erase(args.begin());
+	std::vector<std::string>	recipient = parseArgs(args[0]);
+	args.erase(args.begin());
+	std::string					msg = rebuilt(args);
+	msg.erase(0, 1);
+	for (std::vector<std::string>::iterator target = recipient.begin(); target != recipient.end(); ++target){
+		// send to channel
+		if ((*target)[0] == '#'){
+			if (channels.find(*target) == channels.end()){
+				log_send("404 " + client->getNickname() + " " + *target + " :Cannot send to channel" + CRLF, client->getfd());
+				continue;
+			}
+			channels[*target]->broadcastChannel(":" + client->getNickname() + " PRIVMSG " + *target + " : " + msg + CRLF, client->getfd());
+		}
+		// send to user
+		else{
+			Client *user = getClientByNickname(*target);
+			if (!user){
+				log_send("401 " + client->getNickname() + " :No such nick" + CRLF, client->getfd());
+				continue;
+			}
+			log_send(":" + client->getNickname() + " PRIVMSG " + user->getNickname() + " : " + msg + CRLF, user->getfd());
+		}
+	}
+}
 
 void	Server::invite(std::vector<std::string> &args, Client *client){ std::cout << "<invite>" << std::endl; (void)args; (void)client;}
 
@@ -272,7 +304,7 @@ void	Server::whois(std::vector<std::string> &args, Client *client){
 		send(client->getfd(), reply.c_str(), reply.size(), 0);
 	}
 	else{
-		reply = "401 " + client->getNickname() + ":No such nick" + CRLF;
+		reply = "401 " + client->getNickname() + " :No such nick" + CRLF;
 		reply += "318 " + client->getNickname() + " :End of WHOIS list" + CRLF;
 		send(client->getfd(), reply.c_str(), reply.size(), 0);
 	}

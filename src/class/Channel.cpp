@@ -91,7 +91,20 @@ void	Channel::removeMember(Client &client){
 
 void	Channel::broadcast(std::string str) {
 	for (std::vector<int>::iterator it = _usersFd.begin(); it != _usersFd.end(); ++it) {
-		std::cout << *it << " " << str.c_str() << std::endl;
+		std::stringstream ss;
+		ss << *it;
+		log_send("[" + ss.str() + "]" + str, 0);
+		send(*it, str.c_str(), str.size(), 0);
+	}
+}
+
+void	Channel::broadcastChannel(std::string str, int fd) {
+	for (std::vector<int>::iterator it = _usersFd.begin(); it != _usersFd.end(); ++it) {
+		if (*it == fd)
+			continue;
+		std::stringstream ss;
+		ss << *it;
+		log_send("[" + ss.str() + "]" + str, 0);
 		send(*it, str.c_str(), str.size(), 0);
 	}
 }
