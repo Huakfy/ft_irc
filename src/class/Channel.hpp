@@ -59,6 +59,7 @@ class Channel{
 		void	broadcastChannel(std::string str, int fd);
 
 		bool	isOnChannel(std::string user) const;
+		bool	isOp(std::string user) const;
 
 		void	setTopic(std::string topic, Client &client);
 

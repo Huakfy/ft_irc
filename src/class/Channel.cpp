@@ -40,8 +40,11 @@ std::string	Channel::getName(void) const { return _name; }
 std::string	Channel::getNameList(void) const{
 	std::string	str;
 
-	for (std::vector<std::string>::const_iterator it = _members.begin(); it != _members.end(); ++it)
-		str += "@" + *it + " ";
+	for (std::vector<std::string>::const_iterator it = _members.begin(); it != _members.end(); ++it){
+		if (isOp(*it))
+			str += "@";
+		str += *it + " ";
+	}
 	return str;
 }
 
@@ -111,6 +114,10 @@ void	Channel::broadcastChannel(std::string str, int fd) {
 
 bool	Channel::isOnChannel(std::string user) const {
 	return find(_members.begin(), _members.end(), user) != _members.end();
+}
+
+bool	Channel::isOp(std::string user) const {
+	return find(_op.begin(), _op.end(), user) != _op.end();
 }
 
 void	Channel::setTopic(std::string topic, Client &client) {
