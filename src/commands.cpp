@@ -54,6 +54,18 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 	if (args.size() == 1)
 		return log_send("461 :Not Enough parameters" + CRLF, client->getfd());
 
+	if (args[1] == "0"){
+		for (std::map<std::string, Channel *>::iterator it = channels.begin(); it != channels.end(); ++it){
+			if (it->second->isOnChannel(client->getNickname())){
+				std::vector<std::string> tmp;
+				tmp.push_back("PART");
+				tmp.push_back(it->second->getName());
+				part(tmp, client);
+			}
+		}
+		args.erase(args.begin());
+	}
+
 	args.erase(args.begin());
 	// faire JOIN 0 ? (0 permet de leave tout les channels desquels tu faisais parti en envoyant la commande PART à ta place)
 	// retirer le 0 du vect si on le fait ou simplement args.erase(args.begin()) puisqu'un autre erase va être fait après quoi qu'il arrive donc 2 erase donc ce qu'on veut au final
@@ -190,7 +202,6 @@ void	Server::topic(std::vector<std::string> &args, Client *client){
 
 void	Server::nick(std::vector<std::string> &args, Client *client){
 	printlog("Entering NICK func", LOGS);
-	std::cout << args[1000] << std::endl;
 	std::string error;
 	if (args.size() == 1 || !client->checkNickname(args[1])){
 		if (args.size() == 1)
