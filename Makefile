@@ -15,7 +15,8 @@ CC		=	c++
 FLAG	=	-Wall -Wextra -Werror -std=c++98 -g3
 
 #Source
-FILES	=	main Channel Client Server utils commands
+FILES	=	main Channel Client Server utils commands invite join mode nick part \
+			pass privmsg quit topic user kick
 SRC_DIR	=	src/
 OBJ_DIR	=	obj/
 
@@ -31,7 +32,7 @@ OBJF	=	.cache_exits
 $(OBJF) :
 	@mkdir -p $(OBJ_DIR)
 
-vpath %.cpp $(SRC_DIR) $(SRC_DIR)class
+vpath %.cpp $(SRC_DIR) $(SRC_DIR)class $(SRC_DIR)commands
 vpath %.hpp include/ $(SRC_DIR)class
 
 all : $(NAME)
