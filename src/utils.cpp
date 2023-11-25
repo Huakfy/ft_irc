@@ -36,6 +36,8 @@ std::vector<std::string>	split(std::string str){
 	concatenate every string inside args into one string between space
 */
 std::string	rebuilt(std::vector<std::string> args){
+	if (!args.size())
+		return "";
 	std::string	str;
 	for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); ++it)
 		str += *it + " ";
