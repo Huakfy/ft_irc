@@ -17,8 +17,12 @@ int	main(int argc, char **argv) {
 	if (argc != 3)
 		return print_error(__FILE__, __LINE__, "Needs two arguments ex: ./ircserv <port> <password>", 1);
 
-	//verifier le ports (seulement des chiffres, max, ...), port libre ?
-	//mot de passe, peut etre vide ?
+	unsigned int	i = 0;
+	while (argv[1][i])
+		if (!std::isdigit(argv[1][i++]))
+			break;
+	if (i != std::strlen(argv[1]) || std::atoi(argv[1]) > 65535 || std::atoi(argv[1]) < 0)
+		return print_error(__FILE__, __LINE__, "Port needs to be a postive integer between 0 and 65535", 1);
 
 	try {
 		Server server(argv[1], argv[2]);
