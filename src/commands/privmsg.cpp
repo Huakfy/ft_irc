@@ -27,7 +27,8 @@ void	Server::privmsg(std::vector<std::string> &args, Client *client){
 	std::vector<std::string>	recipient = parseArgs(args[0]);
 	args.erase(args.begin());
 	std::string					msg = rebuilt(args);
-	msg.erase(0, 1);
+    if (msg[0] == ':')
+	    msg.erase(0, 1);
 	for (std::vector<std::string>::iterator target = recipient.begin(); target != recipient.end(); ++target){
 		// send to channel
 		if ((*target)[0] == '#'){
