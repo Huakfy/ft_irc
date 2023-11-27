@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:06 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 14:30:06 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/27 18:40:31 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,9 @@ Channel::Channel(std::string name, std::string username, std::string pass, Clien
 	_usersFd.push_back(client.getfd());
 	_onlyinvite = false;
 	_currentUser = 1;
-	_maxUser = 10;
+	_maxUser = -1;
 	_t = 0; //if 0 everyone can change topic, if one user has to be operator
+	gettimeofday(&_creationTime, NULL);
 	return ;
 }
 
@@ -61,8 +62,8 @@ std::string	Channel::getNameList(void) const{
 	return str;
 }
 
-unsigned int	Channel::getMaxUser(void) const { return _maxUser; }
-unsigned int	Channel::getCurrentUser(void) const { return _currentUser; }
+int	Channel::getMaxUser(void) const { return _maxUser; }
+int	Channel::getCurrentUser(void) const { return _currentUser; }
 
 bool	Channel::getNeedPass(void) const { return _needpass; }
 bool	Channel::getOnlyInvite(void) const { return _onlyinvite; }
@@ -72,6 +73,12 @@ bool	Channel::checkPass(std::string pass) const { return pass == _password; }
 bool	Channel::isInvited(std::string user) const { return find(_invited.begin(), _invited.end(), user) != _invited.end(); }
 
 void	Channel::addInvited(std::string username){ _invited.push_back(username); }
+
+void	Channel::remInvited(std::string username){
+	int	i;
+	for (i = 0; _invited[i] != username; ++i);
+	_invited[i].erase();
+}
 
 void	Channel::addMember(Client &client){
 	_members.push_back(client.getNickname());
@@ -148,11 +155,29 @@ void	Channel::setTopic(std::string topic, Client &client) {
 }
 
 bool	Channel::getT() const {return _t;}
-//bool	Channel::getK() const {return _k;}
-//bool	Channel::getO() const {return _o;}
-//bool	Channel::getL() const {return _l;}
 
 void	Channel::setT(bool b) {_t = b;}
-//bool	Channel::setK(bool b) {_k = b;}
-//bool	Channel::setO(bool b) {_o = b;}
-//bool	Channel::setL(bool b) {_l = b;}
+
+timeval	Channel::getCreationTime() const {return _creationTime;}
+
+void	Channel::setOnlyInvite(bool b) { _onlyinvite = b; }
+
+void	Channel::setPass(std::string pass) {
+	_password = pass;
+	_needpass = 1;
+	if (pass.empty())
+		_needpass = 0;
+}
+
+void	Channel::setOp(std::string name) { _op.push_back(name); }
+void	Channel::removeOp(std::string name) {
+	for (std::vector<std::string>::iterator it = _op.begin(); it != _op.end(); ++it)
+		if (*it == name) {
+			_op.erase(it);
+			break;
+		}
+}
+
+void	Channel::setMaxUser(int i){
+	_maxUser = i;
+}

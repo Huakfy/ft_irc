@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:12 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 14:30:12 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/27 18:18:07 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 # include "Client.hpp"
 
 class Channel{
-
 	private:
 		std::vector<std::string>	_members;
 		std::vector<std::string>	_op;
@@ -33,8 +32,7 @@ class Channel{
 		bool						_needpass;
 		bool						_onlyinvite;
 		bool						_t;
-		//bool						_o;
-		//bool						_l;
+		struct timeval				_creationTime;
 
 		class InvalidName : public std::exception{
 			public:
@@ -53,8 +51,8 @@ class Channel{
 		std::string	getName(void) const;
 		std::string	getNameList(void) const;
 
-		unsigned int	getMaxUser(void) const;
-		unsigned int	getCurrentUser(void) const;
+		int			getMaxUser(void) const;
+		int			getCurrentUser(void) const;
 
 		bool	getNeedPass(void) const;
 		bool	getOnlyInvite(void) const;
@@ -63,6 +61,7 @@ class Channel{
 		bool	isInvited(std::string user) const;
 
 		void	addInvited(std::string username);
+		void	remInvited(std::string username);
 		void	addMember(Client &client);
 
 		void	removeMember(Client &client);
@@ -76,12 +75,17 @@ class Channel{
 		void	setTopic(std::string topic, Client &client);
 
 		bool	getT() const;
-		//bool	getO() const;
-		//bool	getL() const;
-
 		void	setT(bool b);
-		//bool	setO(bool b);
-		//bool	setL(bool b);
+		timeval	getCreationTime() const;
+
+		void	setOnlyInvite(bool b);
+
+		void	setPass(std::string pass);
+
+		void	setOp(std::string name);
+		void	removeOp(std::string name);
+
+		void	setMaxUser(int i);
 };
 
 #endif

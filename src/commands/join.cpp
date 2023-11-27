@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:28 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 14:30:28 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/27 17:39:28 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,13 +66,13 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 		else{
 			// faut faire des verifs ici avec les password et tout ça tmtc
 			// ERR_CHANNELISFULL (471) channel remplie
-			if (it->second->getCurrentUser() == it->second->getMaxUser()){
-				log_send("471" + client->getNickname() + " " + chans[i] + " :Cannot join channel (channel full)" + CRLF, client->getfd());
+			if (it->second->getMaxUser() != -1 && it->second->getCurrentUser() >= it->second->getMaxUser()){
+				log_send("471 " + client->getNickname() + " " + chans[i] + " :Cannot join channel (channel full)" + CRLF, client->getfd());
 				continue;
 			}
 			// ERR_INVITEONLYCHAN (473) channel invite mode only but user not invited
 			if (it->second->getOnlyInvite() && !it->second->isInvited(client->getNickname())){
-				log_send("471" + client->getNickname() + " " + chans[i] + " :Cannot join channel (not invited)" + CRLF, client->getfd());
+				log_send("473 " + client->getNickname() + " " + chans[i] + " :Cannot join channel (not invited)" + CRLF, client->getfd());
 				continue;
 			}
 			// ERR_BADCHANNELKEY (475) mauvais mdp
@@ -82,6 +82,8 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 			}
 			else{
 				it->second->addMember(*client);
+				if (it->second->getOnlyInvite() && it->second->isInvited(client->getNickname()))
+					it->second->remInvited(client->getNickname());
 				reply = ":" + client->getNickname() + "! JOIN " + chans[i] + CRLF;
 				log_send(reply, 0);
 				it->second->broadcast(reply);
