@@ -41,7 +41,10 @@ void	Server::part(std::vector<std::string> &args, Client *client){
 				continue;
 			}
 			else{
-				std::string reply = ":" + client->getNickname() + "! PART " + chan_it->second->getName() + CRLF;
+				std::string reply = ":" + client->getNickname() + "! PART " + chan_it->second->getName();
+				if (!reasons[it - partargs.begin()].empty())
+					reply += " " + reasons[it - partargs.begin()];
+				reply += CRLF;
 				chan_it->second->broadcast(reply);
 				log_send(reply, 0);
 				chan_it->second->removeMember(*client);
