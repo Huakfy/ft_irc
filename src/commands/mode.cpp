@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:36 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 19:23:48 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/27 22:15:47 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,10 @@ static bool	check_int(std::string str){
 }
 
 static void	channelMode(std::vector<std::string> &args, Client *client, Channel *channel){
-	std::string reply = "324 " + client->getNickname() + " " + args[1] + " ";
-	std::string plus;
-	std::string minus;
+	std::string	reply = "324 " + client->getNickname() + " " + args[1] + " ";
+	std::string	plus;
+	std::string	minus;
+
 	channel->getOnlyInvite() ? plus += "i" : minus += "i";
 	channel->getT() ? plus += "t" : minus += "t";
 	channel->getNeedPass() ? plus += "k" : minus += "k";
@@ -46,7 +47,7 @@ static void	channelMode(std::vector<std::string> &args, Client *client, Channel 
 		reply += "+" + plus;
 	if (!minus.empty())
 		reply += "-" + minus;
-	std::stringstream ss;
+	std::stringstream	ss;
 	if (channel->getMaxUser() != -1) {
 		ss << channel->getMaxUser();
 		reply += " " + ss.str();
@@ -56,6 +57,82 @@ static void	channelMode(std::vector<std::string> &args, Client *client, Channel 
 	ss.clear();
 	ss << channel->getCreationTime().tv_sec;
 	log_send("329 " + client->getNickname() + " " + args[1] + " " + ss.str(), client->getfd());
+}
+
+static void	inviteOnly(Channel *channel, bool positive, std::string &pos, std::string &neg){
+	if (channel->getOnlyInvite() == 0 && positive){
+		channel->setOnlyInvite(1);
+		pos += "i";
+	}
+	else if (channel->getOnlyInvite() == 1 && !positive){
+		channel->setOnlyInvite(0);
+		neg += "i";
+	}
+}
+
+static void	protectedTopic(Channel *channel, bool positive, std::string &pos, std::string &neg){
+	if (channel->getT() == 0 && positive){
+		channel->setT(1);
+		pos += "t";
+	}
+	else if (channel->getT() == 1 && !positive){
+		channel->setT(0);
+		neg += "t";
+	}
+}
+
+static void	key(Channel *channel, bool positive, std::string &pos, std::string &neg, \
+	std::vector<std::string> &args, std::vector<std::string>::iterator &it){
+	if (it != args.end()){
+		if (positive){
+			channel->setPass(*it);
+			it++;
+			pos += "k";
+		}
+	}
+	if (channel->getNeedPass() == 1 && !positive){
+		channel->setPass("");
+		neg += "k";
+	}
+}
+
+static void	operatorPrefix(Channel *channel, bool positive, std::string &pos, std::string &neg,\
+	 std::vector<std::string> &args, std::vector<std::string>::iterator &it, std::string &arg){
+	if (it != args.end()){
+		if (!channel->isOp(*it) && positive){
+			channel->setOp(*it);
+			pos += "o";
+			if (!arg.empty())
+				arg += " ";
+			arg += *it;
+		}
+		else if (channel->isOp(*it) && !positive){
+			channel->removeOp(*it);
+			neg += "o";
+			if (!arg.empty())
+				arg += " ";
+			arg += *it;
+		}
+		it++;
+	}
+}
+
+static void	clientLimit(Channel *channel, bool positive, std::string &pos, std::string &neg,\
+	 std::vector<std::string> &args, std::vector<std::string>::iterator &it, std::string &arg){
+	if (it != args.end()){
+		if (positive && check_int(*it)){
+			channel->setMaxUser(std::atoi((*it).c_str()));
+			pos += "l";
+			if (!arg.empty())
+				arg += " ";
+			arg += *it;
+			it++;
+		}
+	}
+	if (channel->getMaxUser() != -1 && !positive) {
+		channel->setMaxUser(-1);
+		neg += "l";
+	}
 }
 
 void	Server::mode(std::vector<std::string> &args, Client *client){
@@ -73,12 +150,12 @@ void	Server::mode(std::vector<std::string> &args, Client *client){
 	if (!channel->isOp(client->getNickname()))
 		return log_send("482 " + client->getNickname() + " " + args[1] + " :You're not channel operator" + CRLF, client->getfd());
 
-
 	std::vector<std::string>::iterator	it = args.begin() + 3;
 	bool positive = true;
 	std::string modestring = args[2];
 	if (modestring[0] != '+' && modestring[0] != '-')
 		return printlog("Mode doesn't start with + or - dropping command", LOGS);
+
 	std::string	pos;
 	std::string	neg;
 	std::string	arg;
@@ -87,74 +164,16 @@ void	Server::mode(std::vector<std::string> &args, Client *client){
 			positive = true;
 		else if (modestring[i] =='-')
 			positive = false;
-		else if (modestring[i] == 'i'){
-			if (channel->getOnlyInvite() == 0 && positive){
-				channel->setOnlyInvite(1);
-				pos += "i";
-			}
-			else if (channel->getOnlyInvite() == 1 && !positive){
-				channel->setOnlyInvite(0);
-				neg += "i";
-			}
-		}
-		else if (modestring[i] == 't'){
-			if (channel->getT() == 0 && positive){
-				channel->setT(1);
-				pos += "t";
-			}
-			else if (channel->getT() == 1 && !positive){
-				channel->setT(0);
-				neg += "t";
-			}
-		}
-		else if (modestring[i] == 'k'){
-			if (it != args.end()){
-				if (positive){
-					channel->setPass(*it);
-					it++;
-					pos += "k";
-				}
-			}
-			if (channel->getNeedPass() == 1 && !positive){
-				channel->setPass("");
-				neg += "k";
-			}
-		}
-		else if (modestring[i] == 'o'){
-			if (it != args.end()){
-				if (!channel->isOp(*it) && positive){
-					channel->setOp(*it);
-					pos += "o";
-					if (!arg.empty())
-						arg += " ";
-					arg += *it;
-				}
-				else if (channel->isOp(*it) && !positive){
-					channel->removeOp(*it);
-					neg += "o";
-					if (!arg.empty())
-						arg += " ";
-					arg += *it;
-				}
-				it++;
-			}
-		}
-		else if (modestring[i] == 'l'){
-			if (it != args.end()){
-				if (positive && check_int(*it)){
-					channel->setMaxUser(std::atoi((*it).c_str()));
-					pos += "l";
-					if (!arg.empty())
-						arg += " ";
-					arg += *it;
-					it++;
-				}
-			}
-			if (channel->getMaxUser() != -1 && !positive) {
-				channel->setMaxUser(-1);
-				neg += "l";
-			}
-		}
+		else if (modestring[i] == 'i')
+			inviteOnly(channel, positive, pos, neg);
+		else if (modestring[i] == 't')
+			protectedTopic(channel, positive, pos, neg);
+		else if (modestring[i] == 'k')
+			key(channel, positive, pos, neg, args, it);
+		else if (modestring[i] == 'o')
+			operatorPrefix(channel, positive, pos, neg, args, it, arg);
+		else if (modestring[i] == 'l')
+			clientLimit(channel, positive, pos, neg, args, it, arg);
 	}
 
 	std::string	reply;
@@ -164,7 +183,7 @@ void	Server::mode(std::vector<std::string> &args, Client *client){
 		reply += "+" + pos;
 	if (!neg.empty())
 		reply += "-" + neg;
-	if (!args.empty())
+	if (!arg.empty())
 		reply += " " + arg;
 	if (!reply.empty())
 		channel->broadcast(reply + CRLF);
