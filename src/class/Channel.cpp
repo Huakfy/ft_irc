@@ -13,7 +13,7 @@
 #include "Channel.hpp"
 
 Channel::Channel(std::string name, std::string username, std::string pass, Client &client){
-	if (name.find(' ') != std::string::npos || name.find('\a') != std::string::npos || name.find(',') != std::string::npos)
+	if (name.find(' ') != std::string::npos || name.find('\a') != std::string::npos || name.find(',') != std::string::npos || name.find('#') != 0)
 		throw (Channel::InvalidName());
 	_name = name;
 	_topic = "";
