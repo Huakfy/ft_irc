@@ -112,12 +112,14 @@ bool	Server::FillBuffer(int user_fd){
 	char	buffer[512];
 	std::memset(&buffer, 0, 512);
 
-	int rd = recv(events[user_fd].data.fd, buffer, 512, 0);
+	int rd = recv(events[user_fd].data.fd, buffer, 512, MSG_DONTWAIT);
 	if (rd == -1 && errno != EAGAIN)
 		return false;
 	else if (rd == 0)
 		return DeleteClient(events[user_fd].data.fd), false;
 	std::string tmp(buffer);
+	if (tmp.find("\r\n") == std::string::npos)
+		return log_send("Server don't support message more than 512 characters.", events[user_fd].data.fd), false;
 	_buffer = tmp;
 	return true;
 }
