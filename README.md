@@ -11,3 +11,9 @@ besoin de fixé la longueur d'un username + ça doit être dit avec le rpl welco
 > USER david david 127.0.0.1 :david <br>
 
 https://modern.ircdocs.horse/
+
+Pour l'envoie de fichier
+> /dcc <\br>
+> /dcc sent <nickname> <path> <\br>
+et pour recevoir
+> /dcc get <nickname> [<path>]<\br>
