@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:32 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 14:30:33 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 15:48:16 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,13 +53,9 @@ void	Server::kick(std::vector<std::string> &args, Client *client){
 			tmp.push_back(chan_it->second->getName());
 			part(tmp, other);
 			tmp.clear();
-			chan_it->second->broadcast(":" + client->getNickname() + "! KICK " + chan_it->second->getName() + " " +  *user + " " + msg + CRLF);
+			if (channels.find(chan) != channels.end())
+				chan_it->second->broadcast(":" + client->getNickname() + "! KICK " + chan_it->second->getName() + " " + *user + " " + msg + CRLF);
+			log_send(":" + client->getNickname() + "! KICK " + chan + " " + *user + " " + msg + CRLF, other->getfd());
 		}
-	}
-
-	if (!chan_it->second->getCurrentUser()){
-		printlog("channel " + chan_it->second->getName() + " has been deleted", LOGS);
-		delete chan_it->second;
-		channels.erase(chan_it);
 	}
 }

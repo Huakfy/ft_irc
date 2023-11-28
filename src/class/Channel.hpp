@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:12 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 18:18:07 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 14:42:22 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class Channel{
 		bool						_onlyinvite;
 		bool						_t;
 		struct timeval				_creationTime;
+		bool						_bot;
 
 		class InvalidName : public std::exception{
 			public:
@@ -86,6 +87,9 @@ class Channel{
 		void	removeOp(std::string name);
 
 		void	setMaxUser(int i);
+
+		bool	getBot() const;
+		void	setBot(bool b);
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:36 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 22:15:47 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 14:57:58 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,25 @@ static void	clientLimit(Channel *channel, bool positive, std::string &pos, std::
 	}
 }
 
+static void	bot(Channel *channel, bool positive, std::string &pos, std::string &neg){
+	if (channel->getBot() == 0 && positive){
+		channel->setBot(1);
+		pos += "b";
+
+		std::string	reply = ":IRCbot! JOIN " + channel->getName() + CRLF; //deplacer pour apres affichage
+		log_send(reply, 0);
+		channel->broadcast(reply);
+	}
+	else if (channel->getBot() == 1 && !positive){
+		channel->setBot(0);
+		neg += "b";
+
+		std::string reply = ":IRCbot! PART " + channel->getName() + CRLF; //deplacer pour apres affichage
+		log_send(reply, 0);
+		channel->broadcast(reply);
+	}
+}
+
 void	Server::mode(std::vector<std::string> &args, Client *client){
 	printlog("Entering MODE func", LOGS);
 
@@ -174,6 +193,8 @@ void	Server::mode(std::vector<std::string> &args, Client *client){
 			operatorPrefix(channel, positive, pos, neg, args, it, arg);
 		else if (modestring[i] == 'l')
 			clientLimit(channel, positive, pos, neg, args, it, arg);
+		else if (modestring[i] == 'b')
+			bot(channel, positive, pos, neg);
 	}
 
 	std::string	reply;

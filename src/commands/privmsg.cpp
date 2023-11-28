@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:31:40 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 14:31:40 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 15:45:39 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,18 @@
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "Server.hpp"
+
+void	Server::kickByBot(Client *client, Channel *channel){
+	std::vector<std::string>	tmp;
+	std::string					channelName = channel->getName();
+
+	tmp.push_back("PART");
+	tmp.push_back(channel->getName());
+	part(tmp, client);
+	if (channels.find(channelName) != channels.end())
+		channel->broadcast(":IRCbot! KICK " + channelName + " " +  client->getNickname() + " On ne parle pas de la concurence" + CRLF);
+	log_send(":IRCbot! KICK " + channelName + " " +  client->getNickname() + " On ne parle pas de la concurence" + CRLF, client->getfd());
+}
 
 void	Server::privmsg(std::vector<std::string> &args, Client *client){
 	printlog("Entering PRIVMSG func", LOGS);
@@ -27,8 +39,8 @@ void	Server::privmsg(std::vector<std::string> &args, Client *client){
 	std::vector<std::string>	recipient = parseArgs(args[0]);
 	args.erase(args.begin());
 	std::string					msg = rebuilt(args);
-    if (msg[0] == ':')
-	    msg.erase(0, 1);
+	if (msg[0] == ':')
+		msg.erase(0, 1);
 	for (std::vector<std::string>::iterator target = recipient.begin(); target != recipient.end(); ++target){
 		// send to channel
 		if ((*target)[0] == '#'){
@@ -36,7 +48,10 @@ void	Server::privmsg(std::vector<std::string> &args, Client *client){
 				log_send("404 " + client->getNickname() + " " + *target + " :Cannot send to channel" + CRLF, client->getfd());
 				continue;
 			}
-			channels[*target]->broadcastChannel(":" + client->getNickname() + " PRIVMSG " + *target + " :" + msg + CRLF, client->getfd());
+			if (channels[*target]->getBot() && msg.find("epitech") != std::string::npos)
+				kickByBot(client, channels[*target]);
+			else
+				channels[*target]->broadcastChannel(":" + client->getNickname() + " PRIVMSG " + *target + " :" + msg + CRLF, client->getfd());
 		}
 		// send to user
 		else{

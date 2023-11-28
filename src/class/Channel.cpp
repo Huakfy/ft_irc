@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:06 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 18:40:31 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 14:56:36 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ Channel::Channel(std::string name, std::string username, std::string pass, Clien
 	_maxUser = -1;
 	_t = 0; //if 0 everyone can change topic, if one user has to be operator
 	gettimeofday(&_creationTime, NULL);
+	_bot = 0;
 	return ;
 }
 
@@ -59,6 +60,8 @@ std::string	Channel::getNameList(void) const{
 			str += "@";
 		str += *it + " ";
 	}
+	if (_bot)
+		str += "@IRCbot ";
 	return str;
 }
 
@@ -181,3 +184,7 @@ void	Channel::removeOp(std::string name) {
 void	Channel::setMaxUser(int i){
 	_maxUser = i;
 }
+
+bool	Channel::getBot() const{ return _bot; }
+
+void	Channel::setBot(bool b){ _bot = b; }

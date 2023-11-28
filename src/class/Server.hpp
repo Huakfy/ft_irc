@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/24 15:12:00 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 15:27:13 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ class Server {
 		void	whois(std::vector<std::string> &buffer, Client *client);
 		void	pong(std::vector<std::string> &buffer, Client *client);
 		void	parse_command(std::string buffer, Client *client);
+		void	kickByBot(Client *client, Channel *channel);
 
 	public:
 		Server(char *port, char *pass);
