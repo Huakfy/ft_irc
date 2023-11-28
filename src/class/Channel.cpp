@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:06 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/28 15:58:10 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 16:01:51 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ Channel::Channel(std::string name, std::string username, std::string pass, Clien
 	_usersFd.push_back(client.getfd());
 	_onlyinvite = false;
 	_currentUser = 1;
-	_maxUser = -1;
 	_maxUser = -1;
 	_t = 0; //if 0 everyone can change topic, if one user has to be operator
 	gettimeofday(&_creationTime, NULL);
