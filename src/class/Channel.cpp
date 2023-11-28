@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:06 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/28 14:56:36 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 15:55:14 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,9 @@ Channel::Channel(std::string name, std::string username, std::string pass, Clien
 	_onlyinvite = false;
 	_currentUser = 1;
 	_maxUser = -1;
+	_maxUser = -1;
 	_t = 0; //if 0 everyone can change topic, if one user has to be operator
 	gettimeofday(&_creationTime, NULL);
-	_bot = 0;
 	return ;
 }
 
@@ -76,6 +76,12 @@ bool	Channel::checkPass(std::string pass) const { return pass == _password; }
 bool	Channel::isInvited(std::string user) const { return find(_invited.begin(), _invited.end(), user) != _invited.end(); }
 
 void	Channel::addInvited(std::string username){ _invited.push_back(username); }
+
+void	Channel::remInvited(std::string username){
+	int	i;
+	for (i = 0; _invited[i] != username; ++i);
+	_invited[i].erase();
+}
 
 void	Channel::remInvited(std::string username){
 	int	i;
@@ -184,7 +190,3 @@ void	Channel::removeOp(std::string name) {
 void	Channel::setMaxUser(int i){
 	_maxUser = i;
 }
-
-bool	Channel::getBot() const{ return _bot; }
-
-void	Channel::setBot(bool b){ _bot = b; }
