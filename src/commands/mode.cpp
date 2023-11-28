@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:36 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/28 17:05:01 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 17:34:39 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,10 +179,18 @@ void	Server::mode(std::vector<std::string> &args, Client *client){
 	std::string	reply;
 	if (!pos.empty() || !neg.empty())
 		reply += "324 " + client->getNickname() + " " + args[1] + " ";
-	if (!pos.empty())
-		reply += "+" + pos;
-	if (!neg.empty())
-		reply += "-" + neg;
+	if (modestring[0] == '+'){
+		if (!pos.empty())
+			reply += "+" + pos;
+		if (!neg.empty())
+			reply += "-" + neg;
+	}
+	else if (modestring[0] == '-'){
+		if (!neg.empty())
+			reply += "-" + neg;
+		if (!pos.empty())
+			reply += "+" + pos;
+	}
 	if (!arg.empty())
 		reply += " " + arg;
 	if (!reply.empty())

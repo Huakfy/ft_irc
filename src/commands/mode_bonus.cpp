@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/28 17:01:37 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/28 17:01:38 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 17:31:06 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,18 +139,10 @@ static void	bot(Channel *channel, bool positive, std::string &pos, std::string &
 	if (channel->getBot() == 0 && positive){
 		channel->setBot(1);
 		pos += "b";
-
-		std::string	reply = ":IRCbot! JOIN " + channel->getName() + CRLF; //deplacer pour apres affichage
-		log_send(reply, 0);
-		channel->broadcast(reply);
 	}
 	else if (channel->getBot() == 1 && !positive){
 		channel->setBot(0);
 		neg += "b";
-
-		std::string reply = ":IRCbot! PART " + channel->getName() + CRLF; //deplacer pour apres affichage
-		log_send(reply, 0);
-		channel->broadcast(reply);
 	}
 }
 
@@ -200,12 +192,32 @@ void	Server::mode(std::vector<std::string> &args, Client *client){
 	std::string	reply;
 	if (!pos.empty() || !neg.empty())
 		reply += "324 " + client->getNickname() + " " + args[1] + " ";
-	if (!pos.empty())
-		reply += "+" + pos;
-	if (!neg.empty())
-		reply += "-" + neg;
+	if (modestring[0] == '+'){
+		if (!pos.empty())
+			reply += "+" + pos;
+		if (!neg.empty())
+			reply += "-" + neg;
+	}
+	else if (modestring[0] == '-'){
+		if (!neg.empty())
+			reply += "-" + neg;
+		if (!pos.empty())
+			reply += "+" + pos;
+	}
 	if (!arg.empty())
 		reply += " " + arg;
 	if (!reply.empty())
 		channel->broadcast(reply + CRLF);
+
+	if (pos.find('b') != std::string::npos){
+		std::string	reply = ":IRCbot! JOIN " + channel->getName() + CRLF; //deplacer pour apres affichage
+		log_send(reply, 0);
+		channel->broadcast(reply);
+	}
+	if (neg.find('b') != std::string::npos){
+		std::string reply = ":IRCbot! PART " + channel->getName() + CRLF; //deplacer pour apres affichage
+		log_send(reply, 0);
+		channel->broadcast(reply);
+	}
+
 }
