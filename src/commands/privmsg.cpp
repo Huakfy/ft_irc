@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:31:40 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/28 15:45:39 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 16:53:11 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void	Server::privmsg(std::vector<std::string> &args, Client *client){
 		else{
 			Client *user = getClientByNickname(*target);
 			if (!user){
-				log_send("401 " + client->getNickname() + " :No such nick" + CRLF, client->getfd());
+				log_send("401 " + client->getNickname() + " " + *target + " :No such nick" + CRLF, client->getfd());
 				continue;
 			}
 			log_send(":" + client->getNickname() + " PRIVMSG " + user->getNickname() + " :" + msg + CRLF, user->getfd());
