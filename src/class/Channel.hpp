@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:12 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/28 15:54:42 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/28 15:57:30 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,8 +54,6 @@ class Channel{
 
 		int			getMaxUser(void) const;
 		int			getCurrentUser(void) const;
-		int			getMaxUser(void) const;
-		int			getCurrentUser(void) const;
 
 		bool	getNeedPass(void) const;
 		bool	getOnlyInvite(void) const;
@@ -64,7 +62,6 @@ class Channel{
 		bool	isInvited(std::string user) const;
 
 		void	addInvited(std::string username);
-		void	remInvited(std::string username);
 		void	remInvited(std::string username);
 		void	addMember(Client &client);
 
