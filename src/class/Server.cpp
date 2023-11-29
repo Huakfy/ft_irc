@@ -108,19 +108,26 @@ void	Server::DeleteClient(int user_fd){
 }
 
 bool	Server::FillBuffer(int user_fd){
-	_buffer.clear();
 	char	buffer[512];
+	int		data_fd = events[user_fd].data.fd;
 	std::memset(&buffer, 0, 512);
 
-	int rd = recv(events[user_fd].data.fd, buffer, 512, MSG_DONTWAIT);
-	if (rd == -1)
-		return false;
-	else if (rd == 0)
-		return DeleteClient(events[user_fd].data.fd), false;
-	std::string tmp(buffer);
-	if (tmp.find("\r\n") == std::string::npos)
-		return log_send("Server don't support message more than 512 characters.", events[user_fd].data.fd), false;
-	_buffer = tmp;
+	if (bufferMap.find(user_fd) == bufferMap.end())
+		bufferMap.insert(std::pair<int, std::string>(data_fd, ""));
+
+	while (1){
+		int rd = recv(data_fd, buffer, 512, MSG_DONTWAIT);
+		if (rd == -1)
+			return false;
+		else if (rd == 0)
+			return DeleteClient(data_fd), false;
+		std::string tmp(buffer);
+		if (bufferMap[data_fd].size() > 512)
+			return log_send("Server don't support message more than 512 characters.", data_fd), false;
+		bufferMap[data_fd] += tmp;
+		if (tmp.find(CRLF) != std::string::npos)
+			break;
+	}
 	return true;
 }
 
@@ -129,9 +136,9 @@ void	Server::ExistingClient(int user_fd) {
 
 	if (!FillBuffer(user_fd))
 		return ;
-	printlog(_buffer, RECV);
-	std::string message(_buffer);
-	_buffer.clear();
+	printlog(bufferMap[user_data_fd], RECV);
+	std::string message(bufferMap[user_data_fd]);
+	bufferMap[user_data_fd] = "";
 
 	Client *client = clients[user_data_fd];
 	client->setfd(user_data_fd);

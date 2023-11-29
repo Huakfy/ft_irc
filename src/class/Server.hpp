@@ -29,7 +29,7 @@ class Server {
 		std::map<int, Client*>	clients;
 		std::map<std::string, Channel*> channels;
 		struct epoll_event	ev, events[MAX_EVENTS];
-		std::string _buffer;
+		std::map<int, std::string> bufferMap;
 		std::string _pass;
 
 		class FunctionError : public std::exception{
