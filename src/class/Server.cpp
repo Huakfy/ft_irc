@@ -65,17 +65,17 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), _hints(addrinfo())
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == -1)
 		PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	struct sigaction act, oldact;
-	act.sa_handler = sigint_handler;
-	if (sigemptyset(&act.sa_mask) == -1)
-		PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
+	// struct sigaction act, oldact;
+	// act.sa_handler = sigint_handler;
+	// if (sigemptyset(&act.sa_mask) == -1)
+	// 	PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	act.sa_flags = 0;
-	if (sigaction(SIGINT, NULL, &oldact) == -1)
-		PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
+	// act.sa_flags = 0;
+	// if (sigaction(SIGINT, NULL, &oldact) == -1)
+	// 	PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	if (sigaction(SIGINT, &act, NULL) == -1)
-		PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
+	// if (sigaction(SIGINT, &act, NULL) == -1)
+	// 	PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
 }
 
 int		Server::NewClient(void) {
@@ -87,6 +87,7 @@ int		Server::NewClient(void) {
 		PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
 
 	clients.insert(std::pair<int, Client*>(tmpfd, new Client(peer_addr, peer_addr_size)));
+	bufferMap.insert(std::pair<int, std::string>(tmpfd, ""));
 
 	if (fcntl(tmpfd, F_SETFL, O_NONBLOCK) == -1)
 		PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
@@ -104,6 +105,7 @@ void	Server::DeleteClient(int user_fd){
 	close(user_fd);
 	delete clients[user_fd];
 	clients.erase(user_fd);
+	bufferMap.erase(user_fd);
 	std::cout << "\033[0;91m<Server LOGS>\033[0;39m client with fd " << user_fd << " has been erased" << std::endl;
 }
 
@@ -112,22 +114,28 @@ bool	Server::FillBuffer(int user_fd){
 	int		data_fd = events[user_fd].data.fd;
 	std::memset(&buffer, 0, 512);
 
-	if (bufferMap.find(user_fd) == bufferMap.end())
-		bufferMap.insert(std::pair<int, std::string>(data_fd, ""));
+	printlog("Entering Fillbuffer func", LOGS);
 
-	while (1){
-		int rd = recv(data_fd, buffer, 512, MSG_DONTWAIT);
-		if (rd == -1)
-			return false;
-		else if (rd == 0)
-			return DeleteClient(data_fd), false;
-		std::string tmp(buffer);
-		if (bufferMap[data_fd].size() > 512)
-			return log_send("Server don't support message more than 512 characters.", data_fd), false;
-		bufferMap[data_fd] += tmp;
-		if (tmp.find(CRLF) != std::string::npos)
-			break;
-	}
+	int rd = recv(data_fd, buffer, 512, MSG_DONTWAIT);
+	std::cout << rd << " " << (errno != EAGAIN) << std::endl;
+	if (rd == -1 && errno != EAGAIN)
+		return false;
+	else if (rd == 0)
+		return DeleteClient(data_fd), false;
+
+	if (rd == 512)
+		buffer[rd - 1] = 0; // pour eviter conditionnal jump dans le prochain if
+	
+	std::string tmp(buffer);
+
+	if (bufferMap[data_fd].size() + std::strlen(buffer) > 512 || (rd == 512 && tmp.find(CRLF) == std::string::npos))
+		return printlog("Server don't support message more than 512 characters.", data_fd), bufferMap[data_fd] = "", false;
+
+	if (tmp.find(CRLF) == std::string::npos)
+		return printlog("CRLF not found", LOGS), false;
+	
+	bufferMap[data_fd] += tmp;
+	
 	return true;
 }
 
