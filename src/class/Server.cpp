@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/23 17:37:07 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/29 13:33:01 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ bool	Server::FillBuffer(int user_fd){
 	std::memset(&buffer, 0, 512);
 
 	int rd = recv(events[user_fd].data.fd, buffer, 512, MSG_DONTWAIT);
-	if (rd == -1 && errno != EAGAIN)
+	if (rd == -1)
 		return false;
 	else if (rd == 0)
 		return DeleteClient(events[user_fd].data.fd), false;
