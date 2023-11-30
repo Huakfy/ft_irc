@@ -6,7 +6,7 @@
 /*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/30 14:40:02 by echapus          ###   ########.fr       */
+/*   Updated: 2023/11/30 15:46:53 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class Server {
 		void	PrintFunctionError(std::string file, int line, std::string error, int err);
 		int		NewClient(void);
 
+		void	QuitAndDelete(int user_fd);
 		void	DeleteClient(int user_fd);
 		bool	FillBuffer(int user_fd);
 		void	ExistingClient(int user_fd);

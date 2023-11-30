@@ -17,3 +17,5 @@ Pour l'envoie de fichier
 > /dcc sent <nickname> <path> <\br>
 et pour recevoir
 > /dcc get <nickname> [<path>]<\br>
+
+delete des channels aussi quand delete client func est appellee

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   quit.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:31:36 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 14:31:36 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/30 15:56:47 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,4 @@ void	Server::quit(std::vector<std::string> &args, Client *client){
 			it->second->broadcastChannel(reply, client->getfd());
 
 	DeleteClient(client->getfd());
-	(void)args;
-	(void)client;
 }

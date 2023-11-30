@@ -6,7 +6,7 @@
 /*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/30 14:42:43 by echapus          ###   ########.fr       */
+/*   Updated: 2023/11/30 16:04:18 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,8 +101,18 @@ int		Server::NewClient(void) {
 	return tmpfd;
 }
 
+void	Server::QuitAndDelete(int user_fd){
+	Client *client = clients[user_fd];
+
+	std::string reply = ":" + client->getNickname() + "! QUIT :Quit: Abrupt quit" + CRLF;
+	for (std::map<std::string, Channel *>::iterator it = channels.begin(); it != channels.end(); ++it)
+		if (it->second->isOnChannel(client->getNickname()))
+			it->second->broadcastChannel(reply, client->getfd());
+
+	DeleteClient(user_fd);
+}
+
 void	Server::DeleteClient(int user_fd){
-	close(user_fd);
 	delete clients[user_fd];
 	clients.erase(user_fd);
 	bufferMap.erase(user_fd);
@@ -121,7 +131,7 @@ bool	Server::FillBuffer(int user_fd){
 	if (rd == -1 && errno != EAGAIN)
 		return false;
 	else if (rd == 0)
-		return DeleteClient(data_fd), false;
+		return QuitAndDelete(data_fd), false;
 
 	if (rd == 512)
 		buffer[rd - 1] = 0; // pour eviter conditionnal jump dans le prochain if

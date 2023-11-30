@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:45:23 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/22 16:59:55 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/30 15:39:57 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 Client::Client(struct sockaddr_in address, socklen_t address_size) : addr(sockaddr_in()), addr_size(sizeof(addr)), auth(false), registered(false) {
 	addr = address;
 	addr_size = address_size;
+	_nickname = "";
 }
 
 Client::~Client() {
