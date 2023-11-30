@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:06 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/28 16:01:51 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/30 18:48:04 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,3 +188,9 @@ void	Channel::setMaxUser(int i){
 bool	Channel::getBot() const{ return _bot; }
 
 void	Channel::setBot(bool b){ _bot = b; }
+
+void	Channel::modeNickname(Client &client, std::string new_nick){
+	std::replace(_members.begin(), _members.end(), client.getNickname(), new_nick);
+	if (isOp(client.getNickname()))
+		std::replace(_op.begin(), _op.end(), client.getNickname(), new_nick);
+}

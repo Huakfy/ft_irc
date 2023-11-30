@@ -6,7 +6,7 @@
 /*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/30 16:04:18 by echapus          ###   ########.fr       */
+/*   Updated: 2023/11/30 19:19:55 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,10 +104,25 @@ int		Server::NewClient(void) {
 void	Server::QuitAndDelete(int user_fd){
 	Client *client = clients[user_fd];
 
+	std::vector<std::string>	channel_names;
+
 	std::string reply = ":" + client->getNickname() + "! QUIT :Quit: Abrupt quit" + CRLF;
 	for (std::map<std::string, Channel *>::iterator it = channels.begin(); it != channels.end(); ++it)
 		if (it->second->isOnChannel(client->getNickname()))
+			channel_names.push_back(it->second->getName());
+
+	for (std::vector<std::string>::iterator chan_it = channel_names.begin(); chan_it != channel_names.end(); ++chan_it){
+		std::map<std::string, Channel *>::iterator it = channels.find(*chan_it);
+		if (it != channels.end()){
+			it->second->removeMember(*client);
 			it->second->broadcastChannel(reply, client->getfd());
+			if (!it->second->getCurrentUser()){
+				printlog("channel " + it->second->getName() + " has been deleted", LOGS);
+				delete it->second;
+				channels.erase(it);
+			}
+		}
+	}
 
 	DeleteClient(user_fd);
 }
@@ -116,6 +131,7 @@ void	Server::DeleteClient(int user_fd){
 	delete clients[user_fd];
 	clients.erase(user_fd);
 	bufferMap.erase(user_fd);
+	close(user_fd);
 	std::cout << "\033[0;91m<Server LOGS>\033[0;39m client with fd " << user_fd << " has been erased" << std::endl;
 }
 

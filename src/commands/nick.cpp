@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   nick.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:31:53 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 14:31:53 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/30 19:02:15 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,9 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 		for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); it++)
 			//send(client->getfd(), reply.c_str(), reply.size(), 0); // il faudrait envoyer à tout les user qui connaissent le boug qui vient de se reNick
 			send(it->first, reply.c_str(), reply.size(), 0); // il faudrait envoyer à tout les user qui connaissent le boug qui vient de se reNick
+		for (std::map<std::string, Channel *>::iterator it = channels.begin(); it != channels.end(); ++it)
+			if (it->second->isOnChannel(client->getNickname()))
+				it->second->modeNickname(*client, args[1]);
 	}
 	client->setNickname(args[1]);
 	client->setRegister();

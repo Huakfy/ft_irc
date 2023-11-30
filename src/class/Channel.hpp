@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:12 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/28 15:57:30 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/30 18:43:36 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,8 @@ class Channel{
 		void	addInvited(std::string username);
 		void	remInvited(std::string username);
 		void	addMember(Client &client);
+
+		void	modeNickname(Client &client, std::string new_nick);
 
 		void	removeMember(Client &client);
 

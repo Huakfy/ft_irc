@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:53 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 14:30:54 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/30 16:47:50 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ void	Server::parse_command(std::string str, Client *client){
 		if (it != cmdMap.end()){
 			if (cmd == "PASS" || (client->getAuth() && cmd == "NICK") || client->getRegister()){
 				try{ (this->*(cmdMap[cmd]))(args, client); }
-				catch (std::exception &e) { static_cast<void>(e); }
+				catch (std::exception &e) { static_cast<void>(e); break;}
 			}
 			else{
 				std::string error;
