@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:34 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/28 15:27:13 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/30 14:40:02 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ class Server {
 		void	kickByBot(Client *client, Channel *channel);
 
 	public:
-		Server(char *port, char *pass);
+		Server(char *port, std::string pass);
 		void	Launch();
 		~Server();
 

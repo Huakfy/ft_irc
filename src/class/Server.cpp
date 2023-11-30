@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
+/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/29 13:33:01 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/11/30 14:42:43 by echapus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,9 @@ void	Server::PrintFunctionError(std::string file, int line, std::string error, i
 	throw FunctionError();
 }
 
-Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), _hints(addrinfo()), _server(NULL), ev(epoll_event()) {
+Server::Server(char *port, std::string pass) : fd(-1), epollfd(-1), _hints(addrinfo()), _server(NULL), ev(epoll_event()) {
 
-	if (!pass[0])
+	if (pass.empty() || pass.find(' ') != std::string::npos)
 		PrintFunctionError(__FILE__, __LINE__, "Invalid Password", 0);
 	_pass = pass;
 
@@ -65,17 +65,17 @@ Server::Server(char *port, char *pass) : fd(-1), epollfd(-1), _hints(addrinfo())
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == -1)
 		PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	// struct sigaction act, oldact;
-	// act.sa_handler = sigint_handler;
-	// if (sigemptyset(&act.sa_mask) == -1)
-	// 	PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
+	struct sigaction act, oldact;
+	act.sa_handler = sigint_handler;
+	if (sigemptyset(&act.sa_mask) == -1)
+		PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	// act.sa_flags = 0;
-	// if (sigaction(SIGINT, NULL, &oldact) == -1)
-	// 	PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
+	act.sa_flags = 0;
+	if (sigaction(SIGINT, NULL, &oldact) == -1)
+		PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
 
-	// if (sigaction(SIGINT, &act, NULL) == -1)
-	// 	PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
+	if (sigaction(SIGINT, &act, NULL) == -1)
+		PrintFunctionError(__FILE__, __LINE__, std::strerror(errno), errno);
 }
 
 int		Server::NewClient(void) {
@@ -127,14 +127,14 @@ bool	Server::FillBuffer(int user_fd){
 		buffer[rd - 1] = 0; // pour eviter conditionnal jump dans le prochain if
 	
 	std::string tmp(buffer);
+	bufferMap[data_fd] += tmp;
 
-	if (bufferMap[data_fd].size() + std::strlen(buffer) > 512 || (rd == 512 && tmp.find(CRLF) == std::string::npos))
+	if (bufferMap[data_fd].size() > 512 || (rd == 512 && tmp.find(CRLF) == std::string::npos))
 		return printlog("Server don't support message more than 512 characters.", data_fd), bufferMap[data_fd] = "", false;
 
 	if (tmp.find(CRLF) == std::string::npos)
 		return printlog("CRLF not found", LOGS), false;
 	
-	bufferMap[data_fd] += tmp;
 	
 	return true;
 }
