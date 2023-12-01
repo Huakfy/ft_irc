@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:16:39 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/30 19:19:55 by echapus          ###   ########.fr       */
+/*   Updated: 2023/12/01 15:26:05 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,7 +143,7 @@ bool	Server::FillBuffer(int user_fd){
 	printlog("Entering Fillbuffer func", LOGS);
 
 	int rd = recv(data_fd, buffer, 512, MSG_DONTWAIT);
-	std::cout << rd << " " << (errno != EAGAIN) << std::endl;
+	//std::cout << rd << " " << (errno != EAGAIN) << std::endl;
 	if (rd == -1 && errno != EAGAIN)
 		return false;
 	else if (rd == 0)
@@ -151,7 +151,7 @@ bool	Server::FillBuffer(int user_fd){
 
 	if (rd == 512)
 		buffer[rd - 1] = 0; // pour eviter conditionnal jump dans le prochain if
-	
+
 	std::string tmp(buffer);
 	bufferMap[data_fd] += tmp;
 
@@ -160,8 +160,8 @@ bool	Server::FillBuffer(int user_fd){
 
 	if (tmp.find(CRLF) == std::string::npos)
 		return printlog("CRLF not found", LOGS), false;
-	
-	
+
+
 	return true;
 }
 
