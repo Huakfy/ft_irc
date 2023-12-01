@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:06 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/30 18:48:04 by echapus          ###   ########.fr       */
+/*   Updated: 2023/12/01 14:25:28 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,4 +193,8 @@ void	Channel::modeNickname(Client &client, std::string new_nick){
 	std::replace(_members.begin(), _members.end(), client.getNickname(), new_nick);
 	if (isOp(client.getNickname()))
 		std::replace(_op.begin(), _op.end(), client.getNickname(), new_nick);
+}
+
+void	Channel::invitedChangeNickname(Client &client, std::string new_nick){
+	std::replace(_invited.begin(), _invited.end(), client.getNickname(), new_nick);
 }
