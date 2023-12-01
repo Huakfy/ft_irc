@@ -23,3 +23,5 @@ delete des channels aussi quand delete client func est appellee
 log sent 2x with mode
 
 j'ai des trucs chelou dans QuitAndDelete dans Serveur.cpp faudrat recheck ca
+
+il faut trunc le nickname si trop grand btw

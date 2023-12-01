@@ -15,6 +15,21 @@
 #include "Client.hpp"
 #include "Server.hpp"
 
+static void	printMoTD(Client &client){
+	std::string nick = client.getNickname();
+	int fd = client.getfd();
+	log_send("375 " + nick + ": -Message of the day-" + CRLF, fd);
+	log_send("372 " + nick + " :" + CRLF, fd);
+	log_send("372 " + nick + " : ███████░████████▒     ██░██████░  ██████░" + CRLF, fd);
+	log_send("372 " + nick + " : ██░░░░░░░░░██░░░░     ██░██░░░██░██░░░░░░" + CRLF, fd);
+	log_send("372 " + nick + " : █████░     ██░        ██░██████░░██░     " + CRLF, fd);
+	log_send("372 " + nick + " : ██░░░░     ██░        ██░██░░░██░██░     " + CRLF, fd);
+	log_send("372 " + nick + " : ██░        ██░███████░██░██░  ██░░██████░" + CRLF, fd);
+	log_send("372 " + nick + " : ░░░        ░░░░░░░░░░░░░░░░  ░░░ ░░░░░░░" + CRLF, fd);
+	log_send("372 " + nick + " :" + CRLF, fd);
+	log_send("376 " + nick + " : End of /MOTDc command." + CRLF, fd);
+}
+
 void	Server::nick(std::vector<std::string> &args, Client *client){
 	printlog("Entering NICK func", LOGS);
 	std::string error;
@@ -36,8 +51,9 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 	}
 
 	if (client->getNickname().empty()){
-		std::string welcome = 	"001 " + args[1] + " :Welcome to our Server. A echapus & mjourno network !" + CRLF; // on grade l'espace avant les ':' mais pas celui après pour que ça soit plus propre
+		std::string welcome = "001 " + args[1] + " :Welcome to our Server. A echapus & mjourno network !" + CRLF; // on grade l'espace avant les ':' mais pas celui après pour que ça soit plus propre
 		log_send(welcome, client->getfd());
+		printMoTD(*client);
 	}
 	else{
 		std::string reply = ":" +  client->getNickname() + " NICK " + args[1] + CRLF;
