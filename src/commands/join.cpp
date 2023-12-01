@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:28 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/27 17:39:28 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/12/01 15:07:54 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,18 +48,25 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 	for (size_t i = 0; i < chans.size(); ++i){
 		std::map<std::string, Channel *>::iterator it = channels.find(chans[i]);
 		std::string	reply;
+
+		std::string	truncatedChanelName = chans[i];
+		if (truncatedChanelName.size() > 50)
+			truncatedChanelName = truncatedChanelName.substr(0, 50);
+
 		// channel existe pas
 		if (it == channels.end()){
+
+
 			try{
-				channels.insert(std::pair<std::string, Channel *>(chans[i], new Channel(chans[i], client->getNickname(), passwords[i], *client)));
+				channels.insert(std::pair<std::string, Channel *>(truncatedChanelName, new Channel(truncatedChanelName, client->getNickname(), passwords[i], *client)));
 			}
 			catch (std::exception &e){
-				log_send("476 " + client->getNickname() + " " + chans[i] + " :Invalid channel name" + CRLF, client->getfd());
+				log_send("476 " + client->getNickname() + " " + truncatedChanelName + " :Invalid channel name" + CRLF, client->getfd());
 				continue;
 			}
-			reply = ":" + client->getNickname() + " JOIN " + chans[i] + CRLF;
+			reply = ":" + client->getNickname() + " JOIN " + truncatedChanelName + CRLF;
 			log_send(reply, 0);
-			channels[chans[i]]->broadcast(reply);
+			channels[truncatedChanelName]->broadcast(reply);
 		}
 
 		// channel existe gg à toi t'as bien suivi xD
@@ -89,14 +96,14 @@ void	Server::join(std::vector<std::string> &args, Client *client){
 				it->second->broadcast(reply);
 			}
 		}
-		if (!channels[chans[i]]->getTopic().empty()){
+		if (!channels[truncatedChanelName]->getTopic().empty()){
 			std::vector<std::string> top;
 			top.push_back("TOPIC");
-			top.push_back(chans[i]);
+			top.push_back(truncatedChanelName);
 			topic(top, client);
 		}
 
-		log_send("353 " + client->getNickname() + " = " + chans[i] + " :" + channels[chans[i]]->getNameList() + CRLF, client->getfd());
-		log_send("366 " + client->getNickname() + " " + chans[i] + " : End of /NAMES list" + CRLF, client->getfd());
+		log_send("353 " + client->getNickname() + " = " + truncatedChanelName + " :" + channels[truncatedChanelName]->getNameList() + CRLF, client->getfd());
+		log_send("366 " + client->getNickname() + " " + truncatedChanelName + " : End of /NAMES list" + CRLF, client->getfd());
 	}
 }

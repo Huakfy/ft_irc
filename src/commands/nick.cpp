@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:31:53 by mjourno           #+#    #+#             */
-/*   Updated: 2023/12/01 14:25:46 by mjourno          ###   ########.fr       */
+/*   Updated: 2023/12/01 14:52:47 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,24 +50,28 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 		}
 	}
 
+	std::string	truncedNickname = args[1];
+	if (truncedNickname.size() > 9)
+		truncedNickname = truncedNickname.substr(0, 9);
+
 	if (client->getNickname().empty()){
-		std::string welcome = "001 " + args[1] + " :Welcome to our Server. A echapus & mjourno network !" + CRLF; // on grade l'espace avant les ':' mais pas celui après pour que ça soit plus propre
+		std::string welcome = "001 " + truncedNickname + " :Welcome to our Server. A echapus & mjourno network !" + CRLF; // on grade l'espace avant les ':' mais pas celui après pour que ça soit plus propre
 		log_send(welcome, client->getfd());
 		printMoTD(*client);
 	}
 	else{
-		std::string reply = ":" +  client->getNickname() + " NICK " + args[1] + CRLF;
+		std::string reply = ":" +  client->getNickname() + " NICK " + truncedNickname + CRLF;
 		printlog(reply, LOGS);
 		for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); it++)
 			//send(client->getfd(), reply.c_str(), reply.size(), 0); // il faudrait envoyer à tout les user qui connaissent le boug qui vient de se reNick
 			send(it->first, reply.c_str(), reply.size(), 0); // il faudrait envoyer à tout les user qui connaissent le boug qui vient de se reNick
 		for (std::map<std::string, Channel *>::iterator it = channels.begin(); it != channels.end(); ++it){
 			if (it->second->isOnChannel(client->getNickname()))
-				it->second->modeNickname(*client, args[1]);
+				it->second->modeNickname(*client, truncedNickname);
 			if (it->second->isInvited(client->getNickname()))
-				it->second->invitedChangeNickname(*client, args[1]);
+				it->second->invitedChangeNickname(*client, truncedNickname);
 		}
 	}
-	client->setNickname(args[1]);
+	client->setNickname(truncedNickname);
 	client->setRegister();
 }
