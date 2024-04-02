@@ -6,14 +6,14 @@
 #    By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 11:30:07 by mjourno           #+#    #+#              #
-#    Updated: 2023/11/28 17:17:13 by mjourno          ###   ########.fr        #
+#    Updated: 2024/04/02 17:06:15 by mjourno          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME	=	ircserv
 NAME_B	=	ircserv_bonus
 CC		=	c++
-FLAG	=	-Wall -Wextra -Werror -std=c++98 -g3
+FLAG	=	-Wall -Wextra -Werror -std=c++98
 
 SRC_DIR	=	src/
 OBJ_DIR	=	obj/
