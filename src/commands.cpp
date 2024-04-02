@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: echapus <echapus@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:30:53 by mjourno           #+#    #+#             */
-/*   Updated: 2023/11/30 16:47:50 by echapus          ###   ########.fr       */
+/*   Updated: 2024/04/02 16:50:56 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,9 +70,7 @@ void	Server::parse_command(std::string str, Client *client){
 			continue;
 		std::string					cmd = args[0];
 
-		// debug_buff(args);
-
-		std::map<std::string, Server::Command>::iterator it = cmdMap.find(cmd); //comme une envie de mettre 'auto'
+		std::map<std::string, Server::Command>::iterator it = cmdMap.find(cmd);
 		if (it != cmdMap.end()){
 			if (cmd == "PASS" || (client->getAuth() && cmd == "NICK") || client->getRegister()){
 				try{ (this->*(cmdMap[cmd]))(args, client); }

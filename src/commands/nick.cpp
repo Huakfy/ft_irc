@@ -6,7 +6,7 @@
 /*   By: mjourno <mjourno@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 14:31:53 by mjourno           #+#    #+#             */
-/*   Updated: 2023/12/01 14:52:47 by mjourno          ###   ########.fr       */
+/*   Updated: 2024/04/02 16:51:45 by mjourno          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,8 +63,7 @@ void	Server::nick(std::vector<std::string> &args, Client *client){
 		std::string reply = ":" +  client->getNickname() + " NICK " + truncedNickname + CRLF;
 		printlog(reply, LOGS);
 		for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); it++)
-			//send(client->getfd(), reply.c_str(), reply.size(), 0); // il faudrait envoyer à tout les user qui connaissent le boug qui vient de se reNick
-			send(it->first, reply.c_str(), reply.size(), 0); // il faudrait envoyer à tout les user qui connaissent le boug qui vient de se reNick
+			send(it->first, reply.c_str(), reply.size(), 0);
 		for (std::map<std::string, Channel *>::iterator it = channels.begin(); it != channels.end(); ++it){
 			if (it->second->isOnChannel(client->getNickname()))
 				it->second->modeNickname(*client, truncedNickname);
