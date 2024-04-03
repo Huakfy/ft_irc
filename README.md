@@ -22,7 +22,7 @@ The program can be compiled using the makefile:
 ```bash
 make
 ```
-And the binary can be invoked as follows:
+And the binary can be run as follows:
 ```bash
 ./ircserv <port> <password>
 ```
